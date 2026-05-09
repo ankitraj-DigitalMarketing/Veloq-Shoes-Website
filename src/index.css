@@ -45,6 +45,12 @@
   ::-webkit-scrollbar-thumb:hover { background: #9ca3af; }
 }
 
+/* Admin panel — all text dark */
+.admin-main { color: #111827; }
+.admin-main .text-gray-400 { color: #4b5563 !important; }
+.admin-main .text-gray-500 { color: #374151 !important; }
+.admin-main p { color: inherit; }
+
 @layer components {
   /* ── BUTTONS ─────────────────────────────────────────────────── */
   .btn-primary {

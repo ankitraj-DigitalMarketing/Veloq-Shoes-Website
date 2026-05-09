@@ -10,7 +10,7 @@ export default {
         card:    '#fafafa',   // subtle card
         ink:     '#111827',   // primary text / buttons
         dark:    '#1f2937',   // secondary text
-        mid:     '#6b7280',   // muted text
+        mid:     '#374151',   // muted text
         lite:    '#d1d5db',   // borders
         accent:  '#111827',   // primary accent (near-black)
         warm:    '#f9fafb',   // warm off-white

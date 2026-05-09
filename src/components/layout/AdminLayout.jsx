@@ -2,20 +2,22 @@ import { useState } from 'react';
 import { Outlet, Link, useLocation, useNavigate } from 'react-router-dom';
 import {
   FiGrid, FiPackage, FiShoppingBag, FiUsers, FiTag, FiSettings,
-  FiMenu, FiX, FiLogOut, FiLayers, FiImage,
+  FiMenu, FiX, FiLogOut, FiLayers, FiImage, FiSliders, FiStar,
 } from 'react-icons/fi';
 import useAuthStore from '../../store/authStore';
 import clsx from 'clsx';
 
 const NAV_ITEMS = [
-  { icon: FiGrid,      label: 'Dashboard',   href: '/admin' },
-  { icon: FiPackage,   label: 'Products',    href: '/admin/products' },
-  { icon: FiLayers,   label: 'Collections', href: '/admin/collections' },
-  { icon: FiShoppingBag, label: 'Orders',   href: '/admin/orders' },
-  { icon: FiUsers,    label: 'Customers',   href: '/admin/customers' },
-  { icon: FiTag,      label: 'Coupons',     href: '/admin/coupons' },
-  { icon: FiImage,    label: 'Banners',     href: '/admin/banners' },
-  { icon: FiSettings, label: 'Settings',    href: '/admin/settings' },
+  { icon: FiGrid,        label: 'Dashboard',   href: '/admin' },
+  { icon: FiPackage,     label: 'Products',    href: '/admin/products' },
+  { icon: FiLayers,      label: 'Collections', href: '/admin/collections' },
+  { icon: FiShoppingBag, label: 'Orders',      href: '/admin/orders' },
+  { icon: FiUsers,       label: 'Customers',   href: '/admin/customers' },
+  { icon: FiStar,        label: 'Reviews',     href: '/admin/reviews' },
+  { icon: FiTag,         label: 'Coupons',     href: '/admin/coupons' },
+  { icon: FiImage,       label: 'Banners',     href: '/admin/banners' },
+  { icon: FiSliders,     label: 'Theme',       href: '/admin/theme' },
+  { icon: FiSettings,    label: 'Settings',    href: '/admin/settings' },
 ];
 
 export default function AdminLayout() {
@@ -78,7 +80,7 @@ export default function AdminLayout() {
       </aside>
 
       {/* Main Content */}
-      <main className="flex-1 overflow-y-auto">
+      <main className="flex-1 overflow-y-auto admin-main" data-lenis-prevent>
         <div className="p-6 max-w-full">
           <Outlet />
         </div>

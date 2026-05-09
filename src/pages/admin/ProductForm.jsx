@@ -32,6 +32,12 @@ export default function AdminProductForm() {
   const queryClient = useQueryClient();
   const [images, setImages]     = useState([]);
   const [uploading, setUploading] = useState(false);
+  const [selectedCollections, setSelectedCollections] = useState([]);
+
+  const { data: collectionsData } = useQuery({
+    queryKey: ['allCollections'],
+    queryFn: () => api.get('/collections/admin/all'),
+  });
 
   const { register, handleSubmit, control, reset, formState: { errors } } = useForm({
     defaultValues: { status: 'active', variants: [{ size: 'UK 8', color: 'Black', colorHex: '#000000', stock: 10 }] },
@@ -59,6 +65,7 @@ export default function AdminProductForm() {
         variants: p.variants,
       });
       setImages(p.images || []);
+      setSelectedCollections((p.collections || []).map(c => c._id || c));
     }
   }, [productData]);
 
@@ -91,6 +98,7 @@ export default function AdminProductForm() {
   const onSubmit = (data) => {
     saveMutation.mutate({
       ...data, images,
+      collections: selectedCollections,
       tags: data.tags ? data.tags.split(',').map((t) => t.trim()).filter(Boolean) : [],
       price: Number(data.price),
       comparePrice: data.comparePrice ? Number(data.comparePrice) : undefined,
@@ -387,6 +395,34 @@ export default function AdminProductForm() {
                   </label>
                 ))}
               </div>
+            </Card>
+
+            {/* Collections */}
+            <Card title="Collections">
+              {collectionsData?.collections?.length ? (
+                <div className="space-y-1 max-h-52 overflow-y-auto pr-1">
+                  {collectionsData.collections.map(col => (
+                    <label key={col._id}
+                      className={clsx('flex items-center gap-3 px-3 py-2 rounded-lg cursor-pointer transition-colors border',
+                        selectedCollections.includes(col._id)
+                          ? 'bg-gray-900 border-gray-900 text-white'
+                          : 'border-transparent hover:bg-gray-50 text-gray-800'
+                      )}>
+                      <input
+                        type="checkbox"
+                        checked={selectedCollections.includes(col._id)}
+                        onChange={(e) => setSelectedCollections(prev =>
+                          e.target.checked ? [...prev, col._id] : prev.filter(id => id !== col._id)
+                        )}
+                        className="w-4 h-4 accent-gray-900 flex-shrink-0"
+                      />
+                      <span className="text-sm font-medium truncate">{col.name}</span>
+                    </label>
+                  ))}
+                </div>
+              ) : (
+                <p className="text-xs text-gray-500">No collections yet. <a href="/admin/collections" className="text-blue-600 underline">Create one</a></p>
+              )}
             </Card>
 
             {/* Tips */}

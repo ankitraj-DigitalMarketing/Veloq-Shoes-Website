@@ -186,8 +186,21 @@ const TRENDING = [
   { label: 'Classic',      gradient: 'from-amber-500 to-yellow-400', tag: 'TIMELESS', href: '/products' },
 ];
 
+const DEFAULT_MARQUEE_ITEMS = ["Premium Men's Footwear", 'Free Delivery ₹999+', '100% Authentic', 'New Arrivals Weekly', 'Sneakers', 'Casual Shoes', 'Slippers & Clogs', 'Express Shipping'];
+const DEFAULT_FEATURE_BAR = [
+  { icon: '🚚', title: 'Free Delivery',  subtitle: 'Above ₹999' },
+  { icon: '🔄', title: '30-Day Returns', subtitle: 'Easy exchange' },
+  { icon: '✅', title: '100% Authentic', subtitle: 'Every product' },
+  { icon: '⚡', title: 'Fast Dispatch',  subtitle: 'Order by 2 PM' },
+];
+
 /* ─── MAIN PAGE ──────────────────────────────────────────────────── */
 export default function HomePage() {
+  const { data: siteSettings } = useQuery({
+    queryKey: ['publicSettings'],
+    queryFn: () => fetch(`${import.meta.env.VITE_API_URL || '/api'}/settings/public`).then(r => r.json()).then(d => d.settings || {}),
+    staleTime: 5 * 60 * 1000,
+  });
   const { data: banners } = useQuery({
     queryKey: ['banners'],
     queryFn: () => api.get('/banners'),
@@ -196,15 +209,20 @@ export default function HomePage() {
   const { data: newArrivals } = useQuery({
     queryKey: ['newArrivals'],
     queryFn: () => api.get('/products?newArrival=true&limit=8'),
+    enabled: siteSettings?.homepageShowNewArrivals !== false,
   });
   const { data: bestSellers } = useQuery({
     queryKey: ['bestSellers'],
     queryFn: () => api.get('/products?bestSeller=true&limit=8'),
+    enabled: siteSettings?.homepageShowBestSellers !== false,
   });
   const { data: allProducts } = useQuery({
     queryKey: ['homeProducts'],
     queryFn: () => api.get('/products?limit=12'),
   });
+
+  const marqueeItems = siteSettings?.marqueeItems?.length ? siteSettings.marqueeItems : DEFAULT_MARQUEE_ITEMS;
+  const featureBar   = siteSettings?.featureBar?.length   ? siteSettings.featureBar   : DEFAULT_FEATURE_BAR;
 
   const banner2 = (banners && banners.find(b => b.position === 2)) || PLACEHOLDER_BANNERS[1];
   const banner3 = (banners && banners.find(b => b.position === 3)) || PLACEHOLDER_BANNERS[2];
@@ -236,19 +254,14 @@ export default function HomePage() {
         {/* ── USP STRIP ── */}
         <div className="bg-white border border-gray-100 rounded-xl py-4 px-4 shadow-sm">
           <div className="grid grid-cols-2 md:grid-cols-4 gap-3">
-            {[
-              { icon: FiTruck,      title: 'Free Delivery',  desc: 'Above ₹999' },
-              { icon: FiRefreshCw,  title: '30-Day Returns', desc: 'Easy exchange' },
-              { icon: FiShield,     title: '100% Authentic', desc: 'Every product' },
-              { icon: FiZap,        title: 'Fast Dispatch',  desc: 'Order by 2 PM' },
-            ].map(({ icon: Icon, title, desc }) => (
-              <div key={title} className="flex items-center gap-3">
-                <div className="w-9 h-9 bg-ink/5 rounded-lg flex items-center justify-center flex-shrink-0">
-                  <Icon className="text-ink text-base" />
+            {featureBar.map((item, i) => (
+              <div key={i} className="flex items-center gap-3">
+                <div className="w-9 h-9 bg-ink/5 rounded-lg flex items-center justify-center flex-shrink-0 text-lg">
+                  {item.icon}
                 </div>
                 <div>
-                  <p className="text-ink text-xs font-bold">{title}</p>
-                  <p className="text-mid text-[10px]">{desc}</p>
+                  <p className="text-ink text-xs font-bold">{item.title}</p>
+                  <p className="text-mid text-[10px]">{item.subtitle}</p>
                 </div>
               </div>
             ))}
@@ -256,32 +269,34 @@ export default function HomePage() {
         </div>
 
         {/* ── SHOP BY COLLECTION ── */}
-        <Reveal>
-          <div className="bg-white border border-gray-100 rounded-xl p-5 shadow-sm">
-            <SectionHeader title="Shop by Collection" sub="Men's Footwear" />
-            <div className="grid grid-cols-2 md:grid-cols-4 gap-3">
-              {collections.map((c, i) => (
-                <motion.div key={c.label}
-                  initial={{ opacity: 0, y: 16 }} whileInView={{ opacity: 1, y: 0 }}
-                  viewport={{ once: true }} transition={{ delay: i * 0.07, duration: 0.4 }}
-                >
-                  <Link to={c.href}
-                    className={`flex flex-col items-center justify-center gap-2.5 p-5 rounded-xl bg-gradient-to-br ${c.bg} border ${c.border} hover:shadow-card-lg transition-all group`}
+        {siteSettings?.homepageShowCollections !== false && (
+          <Reveal>
+            <div className="bg-white border border-gray-100 rounded-xl p-5 shadow-sm">
+              <SectionHeader title="Shop by Collection" sub="Men's Footwear" />
+              <div className="grid grid-cols-2 md:grid-cols-4 gap-3">
+                {collections.map((c, i) => (
+                  <motion.div key={c.label}
+                    initial={{ opacity: 0, y: 16 }} whileInView={{ opacity: 1, y: 0 }}
+                    viewport={{ once: true }} transition={{ delay: i * 0.07, duration: 0.4 }}
                   >
-                    <span className="text-4xl group-hover:scale-110 transition-transform duration-300">{c.emoji}</span>
-                    <div className="text-center">
-                      <p className={`font-bold text-sm ${c.color}`}>{c.label}</p>
-                      <p className="text-[10px] text-mid mt-0.5">{c.sub}</p>
-                    </div>
-                  </Link>
-                </motion.div>
-              ))}
+                    <Link to={c.href}
+                      className={`flex flex-col items-center justify-center gap-2.5 p-5 rounded-xl bg-gradient-to-br ${c.bg} border ${c.border} hover:shadow-card-lg transition-all group`}
+                    >
+                      <span className="text-4xl group-hover:scale-110 transition-transform duration-300">{c.emoji}</span>
+                      <div className="text-center">
+                        <p className={`font-bold text-sm ${c.color}`}>{c.label}</p>
+                        <p className="text-[10px] text-mid mt-0.5">{c.sub}</p>
+                      </div>
+                    </Link>
+                  </motion.div>
+                ))}
+              </div>
             </div>
-          </div>
-        </Reveal>
+          </Reveal>
+        )}
 
         {/* ── WHY VELOQ ── */}
-        <Reveal>
+        {siteSettings?.homepageShowWhyUs !== false && <Reveal>
           <div className="bg-gradient-to-br from-ink via-gray-900 to-gray-800 rounded-xl p-5 md:p-8 overflow-hidden relative">
             <div className="absolute -top-12 -right-12 w-48 h-48 rounded-full bg-white/5 pointer-events-none" />
             <div className="absolute -bottom-8 -left-8 w-36 h-36 rounded-full bg-white/5 pointer-events-none" />
@@ -311,15 +326,15 @@ export default function HomePage() {
               </div>
             </div>
           </div>
-        </Reveal>
+        </Reveal>}
 
         {/* ── MARQUEE ── */}
         <div className="bg-white border border-gray-100 rounded-xl py-3 overflow-hidden shadow-sm">
-          <Marquee items={["Premium Men's Footwear", "Free Delivery ₹999+", "100% Authentic", "New Arrivals Weekly", "Sneakers", "Casual Shoes", "Slippers & Clogs", "Express Shipping"]} />
+          <Marquee items={marqueeItems} />
         </div>
 
         {/* ── TRENDING STYLES ── */}
-        <Reveal>
+        {siteSettings?.homepageShowTrending !== false && <Reveal>
           <div className="bg-white border border-gray-100 rounded-xl p-5 shadow-sm">
             <SectionHeader title="Trending Styles" sub="What's Hot Right Now" href="/products" />
             <div className="flex gap-3 overflow-x-auto pb-2 snap-x scrollbar-hide -mx-1 px-1">
@@ -348,10 +363,10 @@ export default function HomePage() {
               ))}
             </div>
           </div>
-        </Reveal>
+        </Reveal>}
 
         {/* ── NEW ARRIVALS ── */}
-        <Reveal>
+        {siteSettings?.homepageShowNewArrivals !== false && <Reveal>
           <div className="bg-white border border-gray-100 rounded-xl p-5 shadow-sm">
             <SectionHeader title="New Arrivals" sub="Just Dropped" href="/products?newArrival=true" />
             <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 gap-3">
@@ -370,7 +385,7 @@ export default function HomePage() {
               </div>
             )}
           </div>
-        </Reveal>
+        </Reveal>}
 
         {/* ── BOTTOM BANNER ── */}
         <Reveal>
@@ -398,7 +413,7 @@ export default function HomePage() {
         </Reveal>
 
         {/* ── BEST SELLERS ── */}
-        {bsProducts.length > 0 && (
+        {siteSettings?.homepageShowBestSellers !== false && bsProducts.length > 0 && (
           <Reveal>
             <div className="bg-white border border-gray-100 rounded-xl p-5 shadow-sm">
               <SectionHeader title="Best Sellers" sub="Community Picks" href="/products?bestSeller=true" />
@@ -412,7 +427,7 @@ export default function HomePage() {
         )}
 
         {/* ── CUSTOMER REVIEWS ── */}
-        <Reveal>
+        {siteSettings?.homepageShowReviews !== false && <Reveal>
           <div className="bg-white border border-gray-100 rounded-xl p-5 shadow-sm">
             <SectionHeader title="What Customers Say" sub="Real Reviews" />
             <div className="grid grid-cols-1 md:grid-cols-3 gap-3">
@@ -446,7 +461,7 @@ export default function HomePage() {
               ))}
             </div>
           </div>
-        </Reveal>
+        </Reveal>}
 
         {/* ── STATS ── */}
         <Reveal>

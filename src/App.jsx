@@ -33,6 +33,8 @@ import AdminCollections from './pages/admin/Collections';
 import AdminCoupons from './pages/admin/Coupons';
 import AdminSettings from './pages/admin/Settings';
 import AdminBanners from './pages/admin/Banners';
+import AdminTheme from './pages/admin/Theme';
+import AdminReviews from './pages/admin/Reviews';
 
 const pageVariants = {
   initial: { opacity: 0, y: 16 },
@@ -123,6 +125,8 @@ export default function App() {
           <Route path="collections" element={<AdminCollections />} />
           <Route path="coupons" element={<AdminCoupons />} />
           <Route path="banners" element={<AdminBanners />} />
+          <Route path="theme" element={<AdminTheme />} />
+          <Route path="reviews" element={<AdminReviews />} />
           <Route path="settings" element={<AdminSettings />} />
         </Route>
 
