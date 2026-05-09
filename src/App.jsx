@@ -46,10 +46,14 @@ const PageWrapper = ({ children }) => (
   </motion.div>
 );
 
+const ADMIN_EMAIL = 'jaipurankitraj@gmail.com';
+
 const ProtectedRoute = ({ children, adminOnly = false }) => {
   const { token, user } = useAuthStore();
   if (!token) return <Navigate to="/login" replace />;
-  if (adminOnly && user?.role !== 'admin') return <Navigate to="/" replace />;
+  if (adminOnly && (user?.role !== 'admin' || user?.email !== ADMIN_EMAIL)) {
+    return <Navigate to="/" replace />;
+  }
   return children;
 };
 
