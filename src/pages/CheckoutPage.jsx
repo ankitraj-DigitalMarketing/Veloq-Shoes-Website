@@ -1,30 +1,43 @@
 import { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { useForm } from 'react-hook-form';
+import { useQuery } from '@tanstack/react-query';
 import { motion, AnimatePresence } from 'framer-motion';
 import { FiCheck, FiCreditCard, FiTruck, FiMapPin, FiChevronRight } from 'react-icons/fi';
+import { MdQrCode2 } from 'react-icons/md';
 import api from '../utils/api';
 import useCartStore from '../store/cartStore';
 import useAuthStore from '../store/authStore';
-import { formatPrice } from '../utils/helpers';
+import { formatPrice, getImageUrl } from '../utils/helpers';
 import toast from 'react-hot-toast';
 import clsx from 'clsx';
 
 const STEPS = ['Address', 'Payment', 'Review'];
 const INDIAN_STATES = ['Maharashtra','Delhi','Karnataka','Tamil Nadu','Gujarat','Rajasthan','West Bengal','Uttar Pradesh','Telangana','Kerala','Punjab','Haryana','Madhya Pradesh','Andhra Pradesh','Bihar','Odisha','Assam','Jharkhand','Uttarakhand','Himachal Pradesh','Goa','Chhattisgarh','Jammu & Kashmir','Other'];
-const PAYMENT_METHODS = [
-  { id: 'razorpay', label: 'UPI / Card / Net Banking', desc: 'PhonePe, GPay, Paytm, Cards, EMI', icon: FiCreditCard },
-  { id: 'cod',      label: 'Cash on Delivery',          desc: 'Pay when you receive your order', icon: FiTruck },
-];
 
 export default function CheckoutPage() {
   const [step, setStep] = useState(0);
   const [paymentMethod, setPaymentMethod] = useState('razorpay');
+  const [utrNumber, setUtrNumber] = useState('');
   const [loading, setLoading] = useState(false);
   const [savedAddress, setSavedAddress] = useState(null);
   const { items, getSubtotal, discount, coupon, clearCart } = useCartStore();
   const { user } = useAuthStore();
   const navigate = useNavigate();
+
+  const { data: settingsData } = useQuery({
+    queryKey: ['publicSettings'],
+    queryFn: () => api.get('/settings/public'),
+    staleTime: 5 * 60 * 1000,
+  });
+  const settings = settingsData?.settings || {};
+  const upiEnabled = settings.upiPaymentEnabled && settings.upiQrCode;
+
+  const PAYMENT_METHODS = [
+    { id: 'razorpay', label: 'UPI / Card / Net Banking', desc: 'PhonePe, GPay, Paytm, Cards, EMI', icon: FiCreditCard },
+    ...(upiEnabled ? [{ id: 'upi_qr', label: 'Pay via QR Code', desc: `Scan & pay · ${settings.upiId || ''}`, icon: MdQrCode2 }] : []),
+    { id: 'cod', label: 'Cash on Delivery', desc: 'Pay when you receive your order', icon: FiTruck },
+  ];
 
   const { register, handleSubmit, formState: { errors } } = useForm({
     defaultValues: { fullName: user?.name || '', phone: user?.phone || '' }
@@ -52,11 +65,16 @@ export default function CheckoutPage() {
       const orderData = {
         items: items.map((i) => ({ product: i.product, size: i.size, color: i.color, quantity: i.quantity })),
         shippingAddress: savedAddress,
-        paymentMethod,
+        paymentMethod: paymentMethod === 'upi_qr' ? 'upi' : paymentMethod,
         couponCode: coupon?.code,
+        ...(paymentMethod === 'upi_qr' && { utrNumber }),
       };
       const { order } = await api.post('/orders', orderData);
-      if (paymentMethod === 'cod') { clearCart(); navigate(`/order-confirmation/${order._id}`); return; }
+      if (paymentMethod === 'cod' || paymentMethod === 'upi_qr') {
+        clearCart();
+        navigate(`/order-confirmation/${order._id}`);
+        return;
+      }
 
       const loaded = await loadRazorpayScript();
       if (!loaded) throw new Error('Razorpay SDK failed to load');
@@ -208,11 +226,56 @@ export default function CheckoutPage() {
                       </label>
                     ))}
                   </div>
+                  {/* UPI QR Code panel */}
+                  <AnimatePresence>
+                    {paymentMethod === 'upi_qr' && upiEnabled && (
+                      <motion.div initial={{ opacity: 0, height: 0 }} animate={{ opacity: 1, height: 'auto' }} exit={{ opacity: 0, height: 0 }}
+                        className="overflow-hidden">
+                        <div className="border border-green-200 bg-green-50 rounded-xl p-4 mb-4">
+                          <p className="text-xs font-semibold text-green-800 mb-3">Scan karo aur Pay karo — phir UTR number enter karo</p>
+                          <div className="flex flex-col sm:flex-row items-center gap-4">
+                            <div className="bg-white p-2 rounded-xl border border-green-200 flex-shrink-0">
+                              <img src={getImageUrl(settings.upiQrCode)} alt="QR Code"
+                                className="w-40 h-40 object-contain" />
+                            </div>
+                            <div className="flex-1 space-y-2 text-center sm:text-left">
+                              <p className="text-sm font-semibold text-gray-800">{settings.upiName}</p>
+                              <p className="text-sm text-gray-600 font-mono bg-white border border-gray-200 rounded-lg px-3 py-2 inline-block">
+                                {settings.upiId}
+                              </p>
+                              <p className="text-xs text-gray-500">PhonePe / Paytm / GPay / Any UPI app se scan karo</p>
+                              <p className="text-lg font-bold text-gray-900">{formatPrice(total)}</p>
+                            </div>
+                          </div>
+                          <div className="mt-4">
+                            <label className="text-xs font-semibold text-gray-700 mb-1 block">
+                              UTR / Transaction Reference Number *
+                            </label>
+                            <input
+                              value={utrNumber}
+                              onChange={(e) => setUtrNumber(e.target.value)}
+                              className="w-full border border-gray-300 rounded-lg px-3 py-2.5 text-sm focus:ring-2 focus:ring-green-500 outline-none"
+                              placeholder="12-digit UTR number (payment ke baad milega)"
+                            />
+                            <p className="text-[11px] text-gray-400 mt-1">Payment successful hone ke baad UPI app mein UTR milega</p>
+                          </div>
+                        </div>
+                      </motion.div>
+                    )}
+                  </AnimatePresence>
+
                   <div className="flex gap-3">
                     <button onClick={() => setStep(0)} className="flex-1 py-3 border border-gray-200 rounded-xl text-xs font-semibold text-mid hover:border-gray-400 hover:text-ink transition-all">
                       ← Back
                     </button>
-                    <button onClick={() => setStep(2)} className="flex-1 btn-primary py-3 text-sm flex items-center justify-center gap-2">
+                    <button
+                      onClick={() => {
+                        if (paymentMethod === 'upi_qr' && !utrNumber.trim()) {
+                          toast.error('UTR number enter karo'); return;
+                        }
+                        setStep(2);
+                      }}
+                      className="flex-1 btn-primary py-3 text-sm flex items-center justify-center gap-2">
                       Review Order <FiChevronRight />
                     </button>
                   </div>

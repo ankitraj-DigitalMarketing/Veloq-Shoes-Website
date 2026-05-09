@@ -1,9 +1,53 @@
-import { useEffect } from 'react';
+import { useEffect, useRef, useState } from 'react';
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import { useForm } from 'react-hook-form';
+import { FiUpload, FiX } from 'react-icons/fi';
 import api from '../../utils/api';
 import { PageLoader } from '../../components/common/LoadingSpinner';
+import { getImageUrl } from '../../utils/helpers';
 import toast from 'react-hot-toast';
+
+function QrUploadField({ value, onChange }) {
+  const [uploading, setUploading] = useState(false);
+  const inputRef = useRef();
+  const handleFile = async (e) => {
+    const file = e.target.files?.[0];
+    if (!file) return;
+    setUploading(true);
+    try {
+      const fd = new FormData();
+      fd.append('image', file);
+      const data = await api.post('/upload/single', fd, { headers: { 'Content-Type': 'multipart/form-data' } });
+      onChange(data.url);
+      toast.success('QR code uploaded');
+    } catch { toast.error('Upload failed'); }
+    finally { setUploading(false); }
+  };
+  return (
+    <div className="space-y-2">
+      <div className="flex items-center gap-3">
+        <button type="button" onClick={() => inputRef.current?.click()}
+          className="btn-outline text-sm px-4 py-2 flex items-center gap-2">
+          <FiUpload className="text-sm" />
+          {uploading ? 'Uploading...' : value ? 'Change QR Image' : 'Upload QR Image'}
+        </button>
+        {value && (
+          <button type="button" onClick={() => onChange('')}
+            className="text-red-500 hover:text-red-700 text-xs flex items-center gap-1">
+            <FiX className="text-xs" /> Remove
+          </button>
+        )}
+        <input ref={inputRef} type="file" accept="image/*" className="hidden" onChange={handleFile} />
+      </div>
+      {value && (
+        <div className="border border-gray-200 rounded-xl p-3 inline-block bg-white">
+          <img src={getImageUrl(value)} alt="QR Code" className="w-40 h-40 object-contain" />
+          <p className="text-xs text-gray-400 text-center mt-1">Preview</p>
+        </div>
+      )}
+    </div>
+  );
+}
 
 function Section({ title, desc, children }) {
   return (
@@ -19,7 +63,8 @@ function Section({ title, desc, children }) {
 
 export default function AdminSettings() {
   const queryClient = useQueryClient();
-  const { register, handleSubmit, reset, watch } = useForm();
+  const [upiQrCode, setUpiQrCode] = useState('');
+  const { register, handleSubmit, reset, watch, setValue } = useForm();
 
   const { data, isLoading } = useQuery({
     queryKey: ['adminSettings'],
@@ -27,7 +72,10 @@ export default function AdminSettings() {
   });
 
   useEffect(() => {
-    if (data?.settings) reset(data.settings);
+    if (data?.settings) {
+      reset(data.settings);
+      setUpiQrCode(data.settings.upiQrCode || '');
+    }
   }, [data]);
 
   const saveMutation = useMutation({
@@ -192,6 +240,52 @@ export default function AdminSettings() {
             <label className="text-sm font-medium mb-1 block">Meta Description</label>
             <textarea {...register('metaDescription')} rows={2} className="input-field resize-none"
               placeholder="Shop premium shoes online in India. Best prices on sneakers, casual & formal shoes with free delivery." />
+          </div>
+        </Section>
+
+        {/* ── META ADS ── */}
+        <Section title="Meta Ads / Facebook Pixel" desc="Connect your Facebook Pixel ID to track website visitors and run retargeting ads">
+          <div className="bg-blue-50 border border-blue-100 rounded-xl p-3 text-xs text-blue-700 mb-2">
+            Facebook Ads Manager → Events Manager → Your Pixel → Pixel ID copy karo
+          </div>
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+            <div>
+              <label className="text-sm font-medium mb-1 block">Facebook Pixel ID</label>
+              <input {...register('facebookPixelId')} className="input-field" placeholder="123456789012345" />
+              <p className="text-[11px] text-gray-400 mt-1">15-digit number — Facebook Events Manager se milega</p>
+            </div>
+            <div>
+              <label className="text-sm font-medium mb-1 block">Google Ads Conversion ID</label>
+              <input {...register('googleAdsId')} className="input-field" placeholder="AW-XXXXXXXXXX" />
+              <p className="text-[11px] text-gray-400 mt-1">Google Ads → Tools → Conversions se milega</p>
+            </div>
+          </div>
+        </Section>
+
+        {/* ── UPI QR PAYMENT ── */}
+        <Section title="UPI / QR Code Payment" desc="Checkout pe customers ko UPI QR Code dikhega — scan karke pay karenge">
+          <div className="flex items-center gap-3 p-3 bg-gray-50 rounded-lg border border-gray-100 mb-2">
+            <input type="checkbox" {...register('upiPaymentEnabled')} id="upiPaymentEnabled" className="w-4 h-4 accent-ink" />
+            <label htmlFor="upiPaymentEnabled" className="text-sm font-medium">Checkout pe QR Code payment enable karo</label>
+          </div>
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+            <div>
+              <label className="text-sm font-medium mb-1 block">UPI ID *</label>
+              <input {...register('upiId')} className="input-field" placeholder="9876543210@paytm or name@upi" />
+              <p className="text-[11px] text-gray-400 mt-1">Ye UPI ID checkout pe dikhega customers ko</p>
+            </div>
+            <div>
+              <label className="text-sm font-medium mb-1 block">Display Name</label>
+              <input {...register('upiName')} className="input-field" placeholder="VELOQ Payments" />
+            </div>
+          </div>
+          <div>
+            <label className="text-sm font-medium mb-2 block">Payment QR Code Image</label>
+            <p className="text-xs text-gray-400 mb-2">PhonePe / Paytm / Google Pay se apna QR code download karo aur yahan upload karo</p>
+            <QrUploadField
+              value={upiQrCode}
+              onChange={(url) => { setUpiQrCode(url); setValue('upiQrCode', url); }}
+            />
           </div>
         </Section>
 
