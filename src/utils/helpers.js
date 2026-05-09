@@ -9,9 +9,16 @@ export const getDiscountPercent = (price, comparePrice) => {
   return Math.round(((comparePrice - price) / comparePrice) * 100);
 };
 
+const _backendBase = (() => {
+  const api = import.meta.env.VITE_API_URL || '';
+  return api.replace(/\/api\/?$/, '');
+})();
+
 export const getImageUrl = (url) => {
   if (!url) return '/placeholder-shoe.jpg';
   if (url.startsWith('http')) return url;
+  // Relative /uploads/ path — prepend Render backend base URL
+  if (url.startsWith('/uploads') && _backendBase) return `${_backendBase}${url}`;
   return url;
 };
 
