@@ -4,6 +4,19 @@
 
 @import url('https://fonts.googleapis.com/css2?family=Bebas+Neue&family=Inter:wght@300;400;500;600;700;800;900&display=swap');
 
+:root {
+  --white:        #FFFFFF;
+  --black:        #111827;
+  --gray-light:   #F9FAFB;
+  --gray-soft:    #F3F4F6;
+  --gray-border:  #E5E7EB;
+  --gray-mid:     #9CA3AF;
+  --gold:         #F59E0B;
+  --sale-red:     #EF4444;
+  --green:        #16A34A;
+  --ink:          #111827;
+}
+
 @layer base {
   *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
   html { scroll-behavior: smooth; }

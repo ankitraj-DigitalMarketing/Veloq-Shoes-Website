@@ -6,6 +6,7 @@ import { HiOutlineMenuAlt3 } from 'react-icons/hi';
 import { useQuery } from '@tanstack/react-query';
 import useAuthStore from '../../store/authStore';
 import useCartStore from '../../store/cartStore';
+import useUIStore from '../../store/uiStore';
 import api from '../../utils/api';
 import clsx from 'clsx';
 
@@ -26,6 +27,7 @@ export default function Navbar() {
   const [userOpen, setUserOpen]   = useState(false);
   const { user, logout, isAuthenticated } = useAuthStore();
   const itemCount = useCartStore((s) => s.getItemCount());
+  const { openCart } = useUIStore();
   const navigate  = useNavigate();
   const { pathname } = useLocation();
   const inputRef  = useRef(null);
@@ -137,7 +139,11 @@ export default function Navbar() {
                 <FiHeart className="text-lg" />
               </Link>
 
-              <Link to="/cart" className="relative w-9 h-9 flex items-center justify-center rounded-lg text-mid hover:bg-gray-100 hover:text-ink transition-colors">
+              <button
+                onClick={openCart}
+                className="relative w-9 h-9 flex items-center justify-center rounded-lg text-mid hover:bg-gray-100 hover:text-ink transition-colors"
+                aria-label="Open cart"
+              >
                 <FiShoppingCart className="text-lg" />
                 <AnimatePresence>
                   {itemCount > 0 && (
@@ -149,7 +155,7 @@ export default function Navbar() {
                     </motion.span>
                   )}
                 </AnimatePresence>
-              </Link>
+              </button>
 
               {isAuthenticated() ? (
                 <div className="relative" ref={userRef}>

@@ -2,6 +2,7 @@ import { Outlet } from 'react-router-dom';
 import Navbar from './Navbar';
 import Footer from './Footer';
 import MobileBottomNav from './MobileBottomNav';
+import CartDrawer from '../common/CartDrawer';
 
 export default function CustomerLayout() {
   return (
@@ -12,6 +13,7 @@ export default function CustomerLayout() {
       </main>
       <Footer />
       <MobileBottomNav />
+      <CartDrawer />
     </div>
   );
 }

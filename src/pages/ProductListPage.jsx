@@ -2,17 +2,17 @@ import { useState } from 'react';
 import { useSearchParams } from 'react-router-dom';
 import { useQuery } from '@tanstack/react-query';
 import { motion, AnimatePresence } from 'framer-motion';
-import { FiFilter, FiGrid, FiList, FiX, FiSliders } from 'react-icons/fi';
+import { FiFilter, FiGrid, FiList, FiX, FiChevronDown, FiChevronUp } from 'react-icons/fi';
+import { HiAdjustments } from 'react-icons/hi';
 import api from '../utils/api';
 import ProductCard from '../components/common/ProductCard';
 import Pagination from '../components/common/Pagination';
-import { PageLoader } from '../components/common/LoadingSpinner';
 import clsx from 'clsx';
 
 const SORT_OPTIONS = [
   { value: '-createdAt', label: 'Newest' },
-  { value: 'price-asc',  label: 'Price: Low to High' },
-  { value: 'price-desc', label: 'Price: High to Low' },
+  { value: 'price-asc',  label: 'Price: Low → High' },
+  { value: 'price-desc', label: 'Price: High → Low' },
   { value: 'rating',     label: 'Top Rated' },
   { value: 'bestseller', label: 'Best Seller' },
 ];
@@ -20,9 +20,54 @@ const SORT_OPTIONS = [
 const SIZES = ['UK 6', 'UK 7', 'UK 8', 'UK 9', 'UK 10', 'UK 11', 'UK 12'];
 const COLORS = ['Black', 'White', 'Red', 'Blue', 'Green', 'Grey', 'Brown'];
 
+/* ── Skeleton card ── */
+function SkeletonCard() {
+  return (
+    <div className="bg-white border border-gray-100 rounded-xl overflow-hidden">
+      <div className="aspect-[4/5] skeleton" />
+      <div className="p-2.5 space-y-2">
+        <div className="skeleton h-2.5 w-16 rounded" />
+        <div className="skeleton h-3 w-4/5 rounded" />
+        <div className="skeleton h-3 w-1/2 rounded" />
+        <div className="skeleton h-3 w-1/3 rounded" />
+      </div>
+      <div className="skeleton h-9 rounded-b-xl" />
+    </div>
+  );
+}
+
+/* ── Sidebar section with collapse ── */
+function SidebarSection({ title, children }) {
+  const [open, setOpen] = useState(true);
+  return (
+    <div className="border-b border-gray-100 pb-4 mb-4 last:border-0 last:mb-0 last:pb-0">
+      <button
+        onClick={() => setOpen((v) => !v)}
+        className="flex items-center justify-between w-full mb-2"
+      >
+        <span className="text-[10px] font-bold tracking-[0.2em] uppercase text-ink">{title}</span>
+        {open ? <FiChevronUp className="text-xs text-mid" /> : <FiChevronDown className="text-xs text-mid" />}
+      </button>
+      <AnimatePresence initial={false}>
+        {open && (
+          <motion.div
+            initial={{ height: 0, opacity: 0 }}
+            animate={{ height: 'auto', opacity: 1 }}
+            exit={{ height: 0, opacity: 0 }}
+            transition={{ duration: 0.2 }}
+            className="overflow-hidden"
+          >
+            {children}
+          </motion.div>
+        )}
+      </AnimatePresence>
+    </div>
+  );
+}
+
 export default function ProductListPage() {
   const [searchParams, setSearchParams] = useSearchParams();
-  const [filtersOpen, setFiltersOpen] = useState(false);
+  const [bottomSheetOpen, setBottomSheetOpen] = useState(false);
   const [viewMode, setViewMode] = useState('grid');
 
   const page = Number(searchParams.get('page')) || 1;
@@ -68,17 +113,19 @@ export default function ProductListPage() {
   };
 
   const clearFilters = () => setSearchParams({ page: '1' });
-  const activeFilterCount = [selectedSizes.length, selectedColors.length, minPrice].filter(Boolean).length;
+  const activeFilterCount = [selectedSizes.length, selectedColors.length, minPrice, newArrival, bestSeller].filter(Boolean).length;
 
-  const FilterPanel = () => (
-    <div className="space-y-6">
-      <div>
-        <h3 className="text-ink text-[10px] font-bold tracking-[0.2em] uppercase mb-3">Size</h3>
-        <div className="flex flex-wrap gap-2">
+  /* ── Shared filter panel content ── */
+  const FilterPanel = ({ onApply }) => (
+    <div>
+      <SidebarSection title="Size">
+        <div className="flex flex-wrap gap-1.5">
           {SIZES.map((size) => (
-            <button key={size} onClick={() => toggleArrayParam('size', size)}
+            <button
+              key={size}
+              onClick={() => toggleArrayParam('size', size)}
               className={clsx(
-                'w-12 py-1.5 text-xs font-semibold rounded-lg transition-all border',
+                'w-11 py-1.5 text-xs font-semibold rounded-lg border transition-all',
                 selectedSizes.includes(size)
                   ? 'bg-ink text-white border-ink'
                   : 'border-gray-200 text-mid hover:border-ink hover:text-ink'
@@ -88,15 +135,16 @@ export default function ProductListPage() {
             </button>
           ))}
         </div>
-      </div>
+      </SidebarSection>
 
-      <div>
-        <h3 className="text-ink text-[10px] font-bold tracking-[0.2em] uppercase mb-3">Color</h3>
-        <div className="flex flex-wrap gap-2">
+      <SidebarSection title="Color">
+        <div className="flex flex-wrap gap-1.5">
           {COLORS.map((color) => (
-            <button key={color} onClick={() => toggleArrayParam('color', color)}
+            <button
+              key={color}
+              onClick={() => toggleArrayParam('color', color)}
               className={clsx(
-                'px-3 py-1.5 text-xs font-medium rounded-lg transition-all border',
+                'px-3 py-1.5 text-xs font-medium rounded-lg border transition-all',
                 selectedColors.includes(color)
                   ? 'bg-ink text-white border-ink'
                   : 'border-gray-200 text-mid hover:border-ink hover:text-ink'
@@ -106,20 +154,49 @@ export default function ProductListPage() {
             </button>
           ))}
         </div>
-      </div>
+      </SidebarSection>
 
-      <div>
-        <h3 className="text-ink text-[10px] font-bold tracking-[0.2em] uppercase mb-3">Price Range</h3>
+      <SidebarSection title="Price Range">
         <div className="flex gap-2">
-          <input type="number" placeholder="Min ₹" className="input-field text-sm py-2" value={minPrice} onChange={(e) => updateParam('minPrice', e.target.value)} />
-          <input type="number" placeholder="Max ₹" className="input-field text-sm py-2" value={maxPrice} onChange={(e) => updateParam('maxPrice', e.target.value)} />
+          <input
+            type="number"
+            placeholder="Min ₹"
+            className="input-field text-sm py-2"
+            value={minPrice}
+            onChange={(e) => updateParam('minPrice', e.target.value)}
+          />
+          <input
+            type="number"
+            placeholder="Max ₹"
+            className="input-field text-sm py-2"
+            value={maxPrice}
+            onChange={(e) => updateParam('maxPrice', e.target.value)}
+          />
         </div>
-      </div>
+      </SidebarSection>
+
+      <SidebarSection title="Category">
+        <div className="space-y-1">
+          {[{ label: 'New Arrivals', key: 'newArrival' }, { label: 'Best Sellers', key: 'bestSeller' }].map(({ label, key }) => (
+            <label key={key} className="flex items-center gap-2 cursor-pointer group">
+              <input
+                type="checkbox"
+                checked={!!searchParams.get(key)}
+                onChange={(e) => updateParam(key, e.target.checked ? '1' : '')}
+                className="w-4 h-4 rounded border-gray-300 accent-ink cursor-pointer"
+              />
+              <span className="text-xs text-mid group-hover:text-ink transition-colors">{label}</span>
+            </label>
+          ))}
+        </div>
+      </SidebarSection>
 
       {activeFilterCount > 0 && (
-        <button onClick={clearFilters}
-          className="w-full py-2.5 text-xs font-semibold border border-gray-200 rounded-lg text-mid hover:border-ink hover:text-ink transition-all">
-          Clear All Filters
+        <button
+          onClick={() => { clearFilters(); onApply?.(); }}
+          className="w-full mt-2 py-2.5 text-xs font-semibold border border-gray-200 rounded-lg text-mid hover:border-ink hover:text-ink transition-all"
+        >
+          Clear All Filters ({activeFilterCount})
         </button>
       )}
     </div>
@@ -127,102 +204,197 @@ export default function ProductListPage() {
 
   return (
     <div className="max-w-7xl mx-auto px-4 sm:px-6 py-6">
-      {/* Header */}
-      <motion.div initial={{ opacity: 0, y: 12 }} animate={{ opacity: 1, y: 0 }}
-        className="flex items-center justify-between mb-5 gap-4 flex-wrap"
-      >
-        <div>
-          <h1 className="text-2xl font-bold text-ink">
-            {search ? `Results: "${search}"` : 'All Products'}
-          </h1>
-          {data && <p className="text-mid text-xs mt-0.5">{data.pagination?.total} products found</p>}
-        </div>
 
-        <div className="flex items-center gap-2">
-          <button onClick={() => setFiltersOpen(!filtersOpen)}
-            className="md:hidden flex items-center gap-2 px-3 py-2 border border-gray-200 rounded-lg text-xs font-semibold text-mid hover:text-ink hover:border-gray-400 transition-all">
-            <FiSliders />
+      {/* ── Page title ── */}
+      <motion.div initial={{ opacity: 0, y: 10 }} animate={{ opacity: 1, y: 0 }} className="mb-4">
+        <h1 className="text-xl font-bold text-ink">
+          {search ? `Results for "${search}"` : 'All Products'}
+        </h1>
+        {data && (
+          <p className="text-xs text-mid mt-0.5">
+            {data.pagination?.total ?? 0} products found
+          </p>
+        )}
+      </motion.div>
+
+      {/* ── Mobile: horizontal filter pills ── */}
+      <div className="md:hidden mb-3 overflow-x-auto scrollbar-hide">
+        <div className="flex items-center gap-2 pb-1" style={{ minWidth: 'max-content' }}>
+          {/* All Filters button */}
+          <button
+            onClick={() => setBottomSheetOpen(true)}
+            className={clsx(
+              'flex items-center gap-1.5 px-3 py-1.5 rounded-full text-xs font-semibold border flex-shrink-0 transition-all',
+              activeFilterCount > 0
+                ? 'bg-ink text-white border-ink'
+                : 'border-gray-300 text-mid hover:border-gray-400 hover:text-ink'
+            )}
+          >
+            <HiAdjustments className="text-sm" />
             Filters {activeFilterCount > 0 && `(${activeFilterCount})`}
           </button>
 
-          <select value={sort} onChange={(e) => updateParam('sort', e.target.value)}
-            className="border border-gray-200 text-ink text-xs rounded-lg px-3 py-2 outline-none hover:border-gray-400 transition-all bg-white cursor-pointer">
+          {/* Sort pill */}
+          <select
+            value={sort}
+            onChange={(e) => updateParam('sort', e.target.value)}
+            className="flex-shrink-0 border border-gray-300 text-ink text-xs rounded-full px-3 py-1.5 outline-none bg-white cursor-pointer"
+          >
             {SORT_OPTIONS.map((o) => <option key={o.value} value={o.value}>{o.label}</option>)}
           </select>
 
-          <div className="hidden md:flex border border-gray-200 rounded-lg overflow-hidden">
-            <button onClick={() => setViewMode('grid')}
-              className={clsx('p-2 transition-colors', viewMode === 'grid' ? 'bg-ink text-white' : 'text-mid hover:text-ink')}>
-              <FiGrid className="text-sm" />
+          {/* Active size pills */}
+          {selectedSizes.map((size) => (
+            <button
+              key={size}
+              onClick={() => toggleArrayParam('size', size)}
+              className="flex items-center gap-1 px-3 py-1.5 rounded-full text-xs font-semibold bg-ink text-white border border-ink flex-shrink-0"
+            >
+              {size} <FiX className="text-[10px]" />
             </button>
-            <button onClick={() => setViewMode('list')}
-              className={clsx('p-2 transition-colors', viewMode === 'list' ? 'bg-ink text-white' : 'text-mid hover:text-ink')}>
-              <FiList className="text-sm" />
+          ))}
+
+          {/* Active color pills */}
+          {selectedColors.map((color) => (
+            <button
+              key={color}
+              onClick={() => toggleArrayParam('color', color)}
+              className="flex items-center gap-1 px-3 py-1.5 rounded-full text-xs font-semibold bg-ink text-white border border-ink flex-shrink-0"
+            >
+              {color} <FiX className="text-[10px]" />
             </button>
-          </div>
+          ))}
         </div>
-      </motion.div>
+      </div>
+
+      {/* ── Desktop: sort + view toggle bar ── */}
+      <div className="hidden md:flex items-center justify-between mb-4">
+        <div className="flex items-center gap-2">
+          <select
+            value={sort}
+            onChange={(e) => updateParam('sort', e.target.value)}
+            className="border border-gray-200 text-ink text-xs rounded-lg px-3 py-2 outline-none hover:border-gray-400 transition-all bg-white cursor-pointer"
+          >
+            {SORT_OPTIONS.map((o) => <option key={o.value} value={o.value}>{o.label}</option>)}
+          </select>
+        </div>
+
+        <div className="flex border border-gray-200 rounded-lg overflow-hidden">
+          <button
+            onClick={() => setViewMode('grid')}
+            className={clsx('p-2 transition-colors', viewMode === 'grid' ? 'bg-ink text-white' : 'text-mid hover:text-ink')}
+          >
+            <FiGrid className="text-sm" />
+          </button>
+          <button
+            onClick={() => setViewMode('list')}
+            className={clsx('p-2 transition-colors', viewMode === 'list' ? 'bg-ink text-white' : 'text-mid hover:text-ink')}
+          >
+            <FiList className="text-sm" />
+          </button>
+        </div>
+      </div>
 
       <div className="flex gap-6">
-        {/* Desktop Sidebar */}
+        {/* ── Desktop sidebar ── */}
         <aside className="hidden md:block w-52 flex-shrink-0">
           <div className="sticky top-32 bg-white border border-gray-200 rounded-xl p-4">
             <div className="flex items-center justify-between mb-4">
-              <p className="font-bold text-sm text-ink">Filters</p>
+              <div className="flex items-center gap-1.5">
+                <FiFilter className="text-mid text-xs" />
+                <p className="font-bold text-sm text-ink">Filters</p>
+              </div>
               {activeFilterCount > 0 && (
-                <span className="text-[10px] bg-ink text-white rounded-full px-2 py-0.5 font-bold">{activeFilterCount}</span>
+                <span className="text-[10px] bg-ink text-white rounded-full px-2 py-0.5 font-bold">
+                  {activeFilterCount}
+                </span>
               )}
             </div>
             <FilterPanel />
           </div>
         </aside>
 
-        {/* Mobile Drawer */}
-        <AnimatePresence>
-          {filtersOpen && (
-            <motion.div initial={{ opacity: 0 }} animate={{ opacity: 1 }} exit={{ opacity: 0 }}
-              className="fixed inset-0 z-50 md:hidden">
-              <div className="absolute inset-0 bg-black/50" onClick={() => setFiltersOpen(false)} />
-              <motion.div
-                initial={{ x: '100%' }} animate={{ x: 0 }} exit={{ x: '100%' }}
-                transition={{ type: 'spring', damping: 30, stiffness: 300 }}
-                className="absolute right-0 top-0 bottom-0 w-80 bg-white border-l border-gray-200 p-5 overflow-y-auto"
-              >
-                <div className="flex items-center justify-between mb-6">
-                  <h2 className="font-bold text-lg text-ink">Filters</h2>
-                  <button onClick={() => setFiltersOpen(false)} className="text-mid hover:text-ink transition-colors"><FiX className="text-xl" /></button>
-                </div>
-                <FilterPanel />
-              </motion.div>
-            </motion.div>
-          )}
-        </AnimatePresence>
-
-        {/* Product Grid */}
+        {/* ── Product grid ── */}
         <div className="flex-1 min-w-0">
           {isLoading ? (
-            <PageLoader />
+            <div className={clsx('grid gap-3', viewMode === 'grid' ? 'grid-cols-2 md:grid-cols-3' : 'grid-cols-1')}>
+              {Array.from({ length: 8 }).map((_, i) => <SkeletonCard key={i} />)}
+            </div>
           ) : data?.products?.length === 0 ? (
             <div className="text-center py-20">
               <p className="text-5xl mb-4 opacity-30">👟</p>
               <h3 className="text-xl font-bold text-ink mb-2">No products found</h3>
               <p className="text-mid text-sm mb-6">Try adjusting your filters or search query.</p>
-              <button onClick={clearFilters} className="btn-primary px-6 py-2.5 text-sm inline-flex">Clear Filters</button>
+              <button onClick={clearFilters} className="btn-primary px-6 py-2.5 text-sm inline-flex">
+                Clear Filters
+              </button>
             </div>
           ) : (
             <>
               <div className={clsx('grid gap-3', viewMode === 'grid' ? 'grid-cols-2 md:grid-cols-3' : 'grid-cols-1')}>
                 {data?.products?.map((p, i) => (
-                  <motion.div key={p._id} initial={{ opacity: 0, y: 16 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: i * 0.04, duration: 0.35 }}>
-                    <ProductCard product={p} />
-                  </motion.div>
+                  <ProductCard key={p._id} product={p} index={i} />
                 ))}
               </div>
-              <Pagination currentPage={page} totalPages={data?.pagination?.pages} onPageChange={(p) => updateParam('page', p)} />
+              <Pagination
+                currentPage={page}
+                totalPages={data?.pagination?.pages}
+                onPageChange={(p) => updateParam('page', p)}
+              />
             </>
           )}
         </div>
       </div>
+
+      {/* ── Mobile: bottom sheet filter ── */}
+      <AnimatePresence>
+        {bottomSheetOpen && (
+          <motion.div
+            initial={{ opacity: 0 }}
+            animate={{ opacity: 1 }}
+            exit={{ opacity: 0 }}
+            className="fixed inset-0 z-50 md:hidden"
+          >
+            <div
+              className="absolute inset-0 bg-black/50"
+              onClick={() => setBottomSheetOpen(false)}
+            />
+            <motion.div
+              initial={{ y: '100%' }}
+              animate={{ y: 0 }}
+              exit={{ y: '100%' }}
+              transition={{ type: 'spring', damping: 30, stiffness: 280 }}
+              className="absolute bottom-0 left-0 right-0 bg-white rounded-t-2xl max-h-[85vh] flex flex-col"
+            >
+              {/* Sheet header */}
+              <div className="flex items-center justify-between px-5 py-4 border-b border-gray-100 flex-shrink-0">
+                <h2 className="font-bold text-base text-ink">Filters</h2>
+                <button
+                  onClick={() => setBottomSheetOpen(false)}
+                  className="w-8 h-8 rounded-lg hover:bg-gray-100 flex items-center justify-center"
+                >
+                  <FiX className="text-ink" />
+                </button>
+              </div>
+
+              {/* Scrollable content */}
+              <div className="flex-1 overflow-y-auto p-5">
+                <FilterPanel onApply={() => setBottomSheetOpen(false)} />
+              </div>
+
+              {/* Apply button */}
+              <div className="p-4 border-t border-gray-100 flex-shrink-0">
+                <button
+                  onClick={() => setBottomSheetOpen(false)}
+                  className="w-full btn-primary py-3.5 text-sm"
+                >
+                  Show {data?.pagination?.total ?? ''} Products
+                </button>
+              </div>
+            </motion.div>
+          </motion.div>
+        )}
+      </AnimatePresence>
     </div>
   );
 }
