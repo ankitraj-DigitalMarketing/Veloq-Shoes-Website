@@ -58,22 +58,22 @@ export default function ProductCard({ product, index = 0 }) {
           {/* Badges top-left */}
           <div className="absolute top-2 left-2 flex flex-col gap-1">
             {discount > 0 && (
-              <span className="text-[9px] font-black px-1.5 py-0.5 bg-red-500 text-white rounded leading-tight">
-                -{discount}%
+              <span className="text-[10px] font-black px-2 py-0.5 bg-red-500 text-white rounded-md leading-tight shadow-sm">
+                {discount}% OFF
               </span>
             )}
             {product.isNewArrival && !discount && (
-              <span className="text-[9px] font-black px-1.5 py-0.5 bg-ink text-white rounded leading-tight">
+              <span className="text-[10px] font-black px-2 py-0.5 bg-gray-900 text-white rounded-md leading-tight">
                 NEW
               </span>
             )}
             {product.isBestSeller && (
-              <span className="text-[9px] font-black px-1.5 py-0.5 bg-amber-400 text-black rounded leading-tight">
+              <span className="text-[10px] font-black px-2 py-0.5 bg-amber-400 text-black rounded-md leading-tight">
                 BESTSELLER
               </span>
             )}
             {lowStock && !discount && (
-              <span className="text-[9px] font-black px-1.5 py-0.5 bg-orange-100 text-orange-700 rounded leading-tight">
+              <span className="text-[10px] font-black px-2 py-0.5 bg-orange-500 text-white rounded-md leading-tight">
                 LOW STOCK
               </span>
             )}
@@ -123,13 +123,17 @@ export default function ProductCard({ product, index = 0 }) {
           )}
 
           {/* Price row */}
-          <div className="flex items-center gap-1.5 mt-1 flex-wrap">
-            <span className="text-[13px] font-bold text-ink">{formatPrice(product.price)}</span>
-            {product.comparePrice > product.price && (
-              <>
+          <div className="mt-1">
+            <div className="flex items-center gap-1.5 flex-wrap">
+              <span className="text-sm font-bold text-gray-900">{formatPrice(product.price)}</span>
+              {product.comparePrice > product.price && (
                 <span className="text-[11px] text-gray-400 line-through">{formatPrice(product.comparePrice)}</span>
-                <span className="text-[10px] font-bold text-red-500">{discount}% off</span>
-              </>
+              )}
+            </div>
+            {product.comparePrice > product.price && (
+              <p className="text-[10px] font-bold text-green-600 mt-0.5">
+                Save {formatPrice(product.comparePrice - product.price)}
+              </p>
             )}
           </div>
 
