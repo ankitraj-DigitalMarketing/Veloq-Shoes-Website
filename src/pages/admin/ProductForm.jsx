@@ -77,7 +77,7 @@ export default function AdminProductForm() {
       const fd = new FormData();
       files.forEach((f) => fd.append('images', f));
       try {
-        const data = await api.post('/upload/products', fd, { headers: { 'Content-Type': 'multipart/form-data' } });
+        const data = await api.post('/upload/products', fd);
         setImages((prev) => [...prev, ...data.images]);
         toast.success(`${data.images.length} image(s) uploaded`);
       } catch (err) { toast.error(err.message || 'Upload failed'); }

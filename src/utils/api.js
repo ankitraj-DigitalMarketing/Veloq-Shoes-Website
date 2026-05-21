@@ -7,8 +7,11 @@ const api = axios.create({ baseURL: BASE_URL });
 api.interceptors.request.use((config) => {
   const token = localStorage.getItem('veloq_token');
   if (token) config.headers.Authorization = `Bearer ${token}`;
-  // Only set JSON content-type when NOT sending FormData (let browser set multipart boundary)
-  if (!(config.data instanceof FormData)) {
+  if (config.data instanceof FormData) {
+    // Delete any Content-Type so browser sets multipart/form-data with correct boundary
+    delete config.headers['Content-Type'];
+    delete config.headers['content-type'];
+  } else {
     config.headers['Content-Type'] = 'application/json';
   }
   return config;

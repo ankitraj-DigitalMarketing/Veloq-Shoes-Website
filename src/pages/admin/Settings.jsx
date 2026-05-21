@@ -17,7 +17,7 @@ function QrUploadField({ value, onChange }) {
     try {
       const fd = new FormData();
       fd.append('image', file);
-      const data = await api.post('/upload/single', fd, { headers: { 'Content-Type': 'multipart/form-data' } });
+      const data = await api.post('/upload/single', fd);
       onChange(data.url);
       toast.success('QR code uploaded');
     } catch { toast.error('Upload failed'); }
