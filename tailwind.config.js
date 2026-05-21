@@ -4,15 +4,16 @@ export default {
   theme: {
     extend: {
       colors: {
-        /* Gen-Z dark palette */
-        void:        '#0A0A0A',   // body background
-        surface:     '#111111',   // card / panel surface
-        panel:       '#181818',   // elevated surfaces
-        'border-dark': '#222222', // borders
-        ink:         '#FFFFFF',   // primary text
-        mid:         '#777777',   // muted text
-        dim:         '#333333',   // very dim
+        /* Gen-Z white palette */
+        void:        '#FFFFFF',   // body background
+        surface:     '#FFFFFF',   // card / panel surface
+        panel:       '#F8F8F8',   // elevated surfaces
+        'border-dark': '#E8E8E8', // borders
+        ink:         '#0A0A0A',   // primary text
+        mid:         '#666666',   // muted text
+        dim:         '#AAAAAA',   // very dim
         lime:        '#C8FF00',   // electric lime accent
+        'lime-dark': '#A8D800',   // lime hover (for white bg)
         pink:        '#FF3366',   // hot pink
         cyan:        '#00D4FF',   // electric blue
         sale:        '#FF3366',   // sale price
@@ -70,10 +71,10 @@ export default {
         },
       },
       boxShadow: {
-        'card':      '0 1px 4px rgba(0,0,0,0.08), 0 0 0 1px rgba(0,0,0,0.04)',
+        'card':      '0 1px 3px rgba(0,0,0,0.08), 0 0 0 1px rgba(0,0,0,0.06)',
         'card-lg':   '0 4px 20px rgba(0,0,0,0.1)',
-        'card-dark': '0 4px 24px rgba(0,0,0,0.6)',
-        'btn':       '0 2px 8px rgba(0,0,0,0.2)',
+        'card-dark': '0 1px 3px rgba(0,0,0,0.08), 0 0 0 1px rgba(0,0,0,0.06)',
+        'btn':       '0 2px 8px rgba(0,0,0,0.1)',
         'glow-lime': '0 0 20px rgba(200,255,0,0.5), 0 0 60px rgba(200,255,0,0.2)',
         'glow-pink': '0 0 20px rgba(255,51,102,0.5)',
         'inner-glow':'inset 0 0 30px rgba(200,255,0,0.1)',

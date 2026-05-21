@@ -61,10 +61,10 @@ export default function ProductCard({ product, index = 0 }) {
   return (
     <motion.div
       ref={cardRef}
-      initial={{ opacity: 0, y: 30, rotateX: 15 }}
-      whileInView={{ opacity: 1, y: 0, rotateX: 0 }}
-      viewport={{ once: true, margin: '-40px' }}
-      transition={{ duration: 0.45, delay: index * 0.05, ease: [0.22, 1, 0.36, 1] }}
+      initial={{ opacity: 0, y: 30, scale: 0.97 }}
+      whileInView={{ opacity: 1, y: 0, scale: 1 }}
+      viewport={{ once: true, margin: '-60px' }}
+      transition={{ duration: 0.5, delay: index * 0.05, ease: [0.22, 1, 0.36, 1] }}
       style={{
         perspective: '1200px',
         rotateX,
@@ -78,30 +78,30 @@ export default function ProductCard({ product, index = 0 }) {
         to={`/products/${product.slug}`}
         className="block rounded-xl overflow-hidden transition-all duration-300 group"
         style={{
-          background: '#111111',
-          border: '1px solid #222222',
-          boxShadow: '0 4px 24px rgba(0,0,0,0.4)',
+          background: '#FFFFFF',
+          border: '1px solid #E8E8E8',
+          boxShadow: '0 1px 3px rgba(0,0,0,0.06)',
         }}
         onMouseEnter={e => {
-          e.currentTarget.style.borderColor = '#333';
-          e.currentTarget.style.boxShadow = '0 8px 40px rgba(0,0,0,0.6), 0 0 20px rgba(200,255,0,0.05)';
+          e.currentTarget.style.borderColor = '#d0d0d0';
+          e.currentTarget.style.boxShadow = '0 20px 60px rgba(0,0,0,0.1)';
         }}
         onMouseLeave={e => {
-          e.currentTarget.style.borderColor = '#222';
-          e.currentTarget.style.boxShadow = '0 4px 24px rgba(0,0,0,0.4)';
+          e.currentTarget.style.borderColor = '#E8E8E8';
+          e.currentTarget.style.boxShadow = '0 1px 3px rgba(0,0,0,0.06)';
         }}
       >
         {/* Image */}
         <div
           className="relative product-img-wrap aspect-[4/5]"
-          style={{ background: '#181818' }}
+          style={{ background: '#F8F8F8' }}
         >
           <img
             src={getImageUrl(product.images?.[0]?.url)}
             alt={product.name}
             className="w-full h-full object-cover"
             onError={(e) => {
-              e.target.src = 'https://placehold.co/400x500/111111/333333?text=VELOQ';
+              e.target.src = 'https://placehold.co/400x500/F8F8F8/AAAAAA?text=VELOQ';
             }}
           />
 
@@ -118,7 +118,7 @@ export default function ProductCard({ product, index = 0 }) {
             {product.isNewArrival && !discount && (
               <span
                 className="text-[10px] font-black px-2 py-0.5 rounded-md leading-tight"
-                style={{ background: '#FF3366', color: '#fff' }}
+                style={{ background: '#0A0A0A', color: '#ffffff' }}
               >
                 NEW
               </span>
@@ -148,9 +148,9 @@ export default function ProductCard({ product, index = 0 }) {
               'absolute top-2 right-2 w-7 h-7 rounded-full flex items-center justify-center transition-all duration-200 shadow-sm'
             )}
             style={{
-              background: inWishlist ? '#FF3366' : 'rgba(17,17,17,0.9)',
-              color: inWishlist ? '#fff' : '#777',
-              border: '1px solid ' + (inWishlist ? '#FF3366' : '#333'),
+              background: inWishlist ? '#FF3366' : '#FFFFFF',
+              color: inWishlist ? '#fff' : '#666',
+              border: '1px solid ' + (inWishlist ? '#FF3366' : '#E8E8E8'),
             }}
           >
             <FiHeart className={clsx('text-xs', inWishlist && 'fill-current')} />
@@ -161,13 +161,13 @@ export default function ProductCard({ product, index = 0 }) {
         <div className="px-2.5 pt-2 pb-0">
           <p
             className="text-[10px] uppercase tracking-widest font-medium truncate"
-            style={{ color: '#555' }}
+            style={{ color: '#AAAAAA' }}
           >
             {product.brand || 'VELOQ'}
           </p>
           <h3
             className="text-[13px] font-semibold truncate leading-snug mt-0.5"
-            style={{ color: '#FFFFFF', fontFamily: "'Plus Jakarta Sans', sans-serif" }}
+            style={{ color: '#0A0A0A', fontFamily: "'Plus Jakarta Sans', sans-serif" }}
           >
             {product.name}
           </h3>
@@ -181,13 +181,13 @@ export default function ProductCard({ product, index = 0 }) {
                     key={s}
                     className="text-[9px]"
                     style={{
-                      color: s <= Math.round(product.avgRating) ? '#C8FF00' : '#333',
+                      color: s <= Math.round(product.avgRating) ? '#C8FF00' : '#E8E8E8',
                       fill: s <= Math.round(product.avgRating) ? '#C8FF00' : 'none',
                     }}
                   />
                 ))}
               </div>
-              <span className="text-[10px]" style={{ color: '#555' }}>
+              <span className="text-[10px]" style={{ color: '#AAAAAA' }}>
                 ({product.numReviews})
               </span>
             </div>
@@ -196,13 +196,13 @@ export default function ProductCard({ product, index = 0 }) {
           {/* Price row */}
           <div className="mt-1">
             <div className="flex items-center gap-1.5 flex-wrap">
-              <span className="text-sm font-bold text-white">
+              <span className="text-sm font-bold" style={{ color: '#0A0A0A' }}>
                 {formatPrice(product.price)}
               </span>
               {product.comparePrice > product.price && (
                 <span
                   className="text-[11px] line-through"
-                  style={{ color: '#555' }}
+                  style={{ color: '#AAAAAA' }}
                 >
                   {formatPrice(product.comparePrice)}
                 </span>
@@ -225,7 +225,7 @@ export default function ProductCard({ product, index = 0 }) {
                 <span
                   key={size}
                   className="text-[9px] px-1.5 py-0.5 rounded-sm leading-tight"
-                  style={{ border: '1px solid #333', color: '#555' }}
+                  style={{ border: '1px solid #E8E8E8', color: '#AAAAAA' }}
                 >
                   {size.replace('UK ', '')}
                 </span>
@@ -239,18 +239,22 @@ export default function ProductCard({ product, index = 0 }) {
           onClick={handleAdd}
           style={{
             borderRadius: '0 0 12px 12px',
-            background: added ? '#00D4FF' : '#C8FF00',
-            color: '#0A0A0A',
+            background: added ? '#0A0A0A' : '#C8FF00',
+            color: added ? '#C8FF00' : '#0A0A0A',
             transition: 'all 0.2s',
           }}
           className="w-full mt-2.5 h-9 text-[11px] font-black uppercase tracking-wider flex items-center justify-center gap-1.5"
           onMouseEnter={e => {
             if (!added) {
+              e.currentTarget.style.background = '#A8D800';
               e.currentTarget.style.boxShadow = '0 0 20px rgba(200,255,0,0.4)';
               e.currentTarget.style.transform = 'translateY(-1px)';
             }
           }}
           onMouseLeave={e => {
+            if (!added) {
+              e.currentTarget.style.background = '#C8FF00';
+            }
             e.currentTarget.style.boxShadow = 'none';
             e.currentTarget.style.transform = 'none';
           }}

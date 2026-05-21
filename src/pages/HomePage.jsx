@@ -15,11 +15,10 @@ function Reveal({ children, className = '', delay = 0 }) {
   return (
     <motion.div
       className={className}
-      initial={{ opacity: 0, y: 40, rotateX: 15 }}
-      whileInView={{ opacity: 1, y: 0, rotateX: 0 }}
-      viewport={{ once: true, margin: '-30px' }}
-      transition={{ duration: 0.6, delay, ease: [0.22, 1, 0.36, 1] }}
-      style={{ transformStyle: 'preserve-3d' }}
+      initial={{ opacity: 0, y: 50 }}
+      whileInView={{ opacity: 1, y: 0 }}
+      viewport={{ once: true, margin: '-80px' }}
+      transition={{ duration: 0.7, delay, ease: [0.22, 1, 0.36, 1] }}
     >
       {children}
     </motion.div>
@@ -45,10 +44,10 @@ function Counter({ from = 0, to, suffix = '' }) {
 
 /* ── Placeholder banners ────────────────────────────────────────── */
 const PH = [
-  { position: 1, title: 'New Season Drop', subtitle: "Men's Footwear 2025", buttonText: 'Shop Now', buttonLink: '/products', bgColor: '#0A0A0A', textDark: false },
-  { position: 2, title: 'Sneakers',         subtitle: 'Street-ready kicks',  buttonText: 'Shop Now', buttonLink: '/collections/sneakers',       bgColor: '#0D0D0D', textDark: false },
-  { position: 3, title: 'Casual Shoes',     subtitle: 'Everyday comfort',    buttonText: 'Shop Now', buttonLink: '/collections/casual-shoes',    bgColor: '#0D0D0D', textDark: false },
-  { position: 4, title: 'Slippers & Clogs', subtitle: 'Easy all-day style',  buttonText: 'Shop Now', buttonLink: '/collections/slippers-clogs',  bgColor: '#0D0D0D', textDark: false },
+  { position: 1, title: 'New Season Drop', subtitle: "Men's Footwear 2025", buttonText: 'Shop Now', buttonLink: '/products', bgColor: '#F5F5F5', textDark: true },
+  { position: 2, title: 'Sneakers',         subtitle: 'Street-ready kicks',  buttonText: 'Shop Now', buttonLink: '/collections/sneakers',       bgColor: '#F0F0F0', textDark: true },
+  { position: 3, title: 'Casual Shoes',     subtitle: 'Everyday comfort',    buttonText: 'Shop Now', buttonLink: '/collections/casual-shoes',    bgColor: '#F0F0F0', textDark: true },
+  { position: 4, title: 'Slippers & Clogs', subtitle: 'Easy all-day style',  buttonText: 'Shop Now', buttonLink: '/collections/slippers-clogs',  bgColor: '#F0F0F0', textDark: true },
 ];
 
 /* ── Hero banner ────────────────────────────────────────────────── */
@@ -65,13 +64,26 @@ function HeroBanner({ banners }) {
   }, [slides.length]);
 
   const s = slides[cur];
+  const hasImage = !!s.image;
+
+  /* Split title into words for stagger animation */
+  const words = (s.title || '').split(' ');
+
+  const wordVariants = {
+    hidden: { opacity: 0, y: 40 },
+    visible: (i) => ({
+      opacity: 1,
+      y: 0,
+      transition: { delay: 0.2 + i * 0.08, duration: 0.6, ease: [0.22, 1, 0.36, 1] },
+    }),
+  };
 
   return (
     <div
       className="relative w-full overflow-hidden flex items-center"
       style={{
         minHeight: '100vh',
-        background: s.bgColor || '#0A0A0A',
+        background: hasImage ? (s.bgColor || '#F8F8F8') : 'white',
       }}
     >
       {/* Full-bleed background */}
@@ -84,44 +96,30 @@ function HeroBanner({ banners }) {
           transition={{ duration: 0.8 }}
           className="absolute inset-0"
         >
-          {s.image ? (
+          {hasImage ? (
             <img
               src={getImageUrl(s.image)}
               alt={s.title}
-              className="w-full h-full object-cover"
+              className="w-full h-full object-cover brightness-90"
             />
           ) : (
             <div
               className="w-full h-full"
               style={{
-                background: 'linear-gradient(135deg, #0A0A0A 0%, #111111 50%, #0A0A0A 100%)',
+                background: 'linear-gradient(135deg, #ffffff 0%, #F8F8F8 50%, #F0F0F0 100%)',
               }}
             />
           )}
-          <div
-            className="absolute inset-0"
-            style={{
-              background: 'linear-gradient(to right, rgba(10,10,10,0.92) 0%, rgba(10,10,10,0.6) 50%, rgba(10,10,10,0.2) 100%)',
-            }}
-          />
+          {hasImage && (
+            <div
+              className="absolute inset-0"
+              style={{
+                background: 'linear-gradient(to right, rgba(255,255,255,0.88) 0%, rgba(255,255,255,0.5) 50%, rgba(255,255,255,0.1) 100%)',
+              }}
+            />
+          )}
         </motion.div>
       </AnimatePresence>
-
-      {/* Scan line effect */}
-      <div
-        className="absolute inset-0 pointer-events-none overflow-hidden"
-        style={{ opacity: 0.03 }}
-      >
-        <div
-          style={{
-            position: 'absolute',
-            width: '100%',
-            height: '2px',
-            background: '#C8FF00',
-            animation: 'scan-line 4s linear infinite',
-          }}
-        />
-      </div>
 
       {/* Content */}
       <div className="relative z-10 w-full px-5 sm:px-10 md:px-16 lg:px-24">
@@ -134,25 +132,37 @@ function HeroBanner({ banners }) {
             animate={{ opacity: 1, y: 0 }}
             transition={{ delay: 0.1 }}
             className="inline-block text-[11px] sm:text-xs font-bold tracking-[0.35em] uppercase mb-3"
-            style={{ color: '#C8FF00' }}
+            style={{ color: '#C8FF00', textShadow: '0 0 20px rgba(200,255,0,0.5)' }}
           >
             {s.subtitle}
           </motion.span>
 
-          {/* Giant display title */}
+          {/* Giant display title — word by word stagger */}
           <motion.h1
             key={`title-${cur}`}
-            initial={{ opacity: 0, y: 30 }}
-            animate={{ opacity: 1, y: 0 }}
-            transition={{ delay: 0.15 }}
-            className="text-[clamp(64px,14vw,200px)] leading-none font-black text-white"
+            initial="hidden"
+            animate="visible"
+            className="text-[clamp(64px,14vw,200px)] leading-none font-black"
             style={{
               fontFamily: "'Bebas Neue', sans-serif",
               letterSpacing: '0.02em',
               lineHeight: 0.9,
+              color: '#0A0A0A',
+              display: 'flex',
+              flexWrap: 'wrap',
+              gap: '0.15em',
             }}
           >
-            {s.title}
+            {words.map((word, i) => (
+              <motion.span
+                key={`${word}-${i}`}
+                custom={i}
+                variants={wordVariants}
+                style={{ display: 'inline-block' }}
+              >
+                {word}
+              </motion.span>
+            ))}
           </motion.h1>
 
           {/* Lime underline accent */}
@@ -170,15 +180,15 @@ function HeroBanner({ banners }) {
             key={`btns-${cur}`}
             initial={{ opacity: 0, y: 10 }}
             animate={{ opacity: 1, y: 0 }}
-            transition={{ delay: 0.3 }}
+            transition={{ delay: 0.4 }}
             className="flex gap-3 flex-wrap"
           >
             <Link
               to={s.buttonLink || '/products'}
               className="inline-flex items-center gap-2 px-7 py-3.5 rounded-xl text-sm font-black uppercase tracking-wider transition-all duration-200"
-              style={{ background: '#C8FF00', color: '#0A0A0A' }}
+              style={{ background: '#0A0A0A', color: '#C8FF00' }}
               onMouseEnter={e => {
-                e.currentTarget.style.boxShadow = '0 0 24px rgba(200,255,0,0.5)';
+                e.currentTarget.style.boxShadow = '0 0 24px rgba(200,255,0,0.3), 0 4px 20px rgba(0,0,0,0.2)';
                 e.currentTarget.style.transform = 'translateY(-2px)';
               }}
               onMouseLeave={e => {
@@ -191,14 +201,14 @@ function HeroBanner({ banners }) {
             <Link
               to="/products"
               className="inline-flex items-center gap-2 px-7 py-3.5 rounded-xl text-sm font-bold uppercase tracking-wider transition-all duration-200"
-              style={{ border: '1px solid rgba(255,255,255,0.3)', color: '#fff' }}
+              style={{ border: '2px solid #0A0A0A', color: '#0A0A0A', background: 'transparent' }}
               onMouseEnter={e => {
-                e.currentTarget.style.borderColor = 'rgba(255,255,255,0.7)';
-                e.currentTarget.style.background = 'rgba(255,255,255,0.08)';
+                e.currentTarget.style.background = '#0A0A0A';
+                e.currentTarget.style.color = '#C8FF00';
               }}
               onMouseLeave={e => {
-                e.currentTarget.style.borderColor = 'rgba(255,255,255,0.3)';
                 e.currentTarget.style.background = 'transparent';
+                e.currentTarget.style.color = '#0A0A0A';
               }}
             >
               View All
@@ -214,18 +224,18 @@ function HeroBanner({ banners }) {
             onClick={() => setCur((p) => (p - 1 + slides.length) % slides.length)}
             className="absolute left-4 top-1/2 -translate-y-1/2 w-10 h-10 rounded-full flex items-center justify-center z-20 transition-all"
             style={{
-              background: 'rgba(17,17,17,0.6)',
-              border: '1px solid #333',
-              color: '#fff',
+              background: 'rgba(255,255,255,0.8)',
+              border: '1px solid #E8E8E8',
+              color: '#0A0A0A',
               backdropFilter: 'blur(8px)',
             }}
             onMouseEnter={e => {
               e.currentTarget.style.borderColor = '#C8FF00';
-              e.currentTarget.style.color = '#C8FF00';
+              e.currentTarget.style.background = '#C8FF00';
             }}
             onMouseLeave={e => {
-              e.currentTarget.style.borderColor = '#333';
-              e.currentTarget.style.color = '#fff';
+              e.currentTarget.style.borderColor = '#E8E8E8';
+              e.currentTarget.style.background = 'rgba(255,255,255,0.8)';
             }}
           >
             <FiChevronLeft />
@@ -234,18 +244,18 @@ function HeroBanner({ banners }) {
             onClick={() => setCur((p) => (p + 1) % slides.length)}
             className="absolute right-4 top-1/2 -translate-y-1/2 w-10 h-10 rounded-full flex items-center justify-center z-20 transition-all"
             style={{
-              background: 'rgba(17,17,17,0.6)',
-              border: '1px solid #333',
-              color: '#fff',
+              background: 'rgba(255,255,255,0.8)',
+              border: '1px solid #E8E8E8',
+              color: '#0A0A0A',
               backdropFilter: 'blur(8px)',
             }}
             onMouseEnter={e => {
               e.currentTarget.style.borderColor = '#C8FF00';
-              e.currentTarget.style.color = '#C8FF00';
+              e.currentTarget.style.background = '#C8FF00';
             }}
             onMouseLeave={e => {
-              e.currentTarget.style.borderColor = '#333';
-              e.currentTarget.style.color = '#fff';
+              e.currentTarget.style.borderColor = '#E8E8E8';
+              e.currentTarget.style.background = 'rgba(255,255,255,0.8)';
             }}
           >
             <FiChevronRight />
@@ -261,7 +271,7 @@ function HeroBanner({ banners }) {
                 style={{
                   width: i === cur ? '32px' : '8px',
                   height: '8px',
-                  background: i === cur ? '#C8FF00' : '#333',
+                  background: i === cur ? '#C8FF00' : '#E8E8E8',
                   boxShadow: i === cur ? '0 0 8px rgba(200,255,0,0.5)' : 'none',
                 }}
               />
@@ -273,14 +283,14 @@ function HeroBanner({ banners }) {
       {/* Scroll indicator */}
       <div
         className="absolute bottom-8 right-8 flex flex-col items-center gap-1 z-20"
-        style={{ color: '#555' }}
+        style={{ color: '#AAAAAA' }}
       >
         <span className="text-[9px] tracking-[0.3em] uppercase">Scroll</span>
         <motion.div
           animate={{ y: [0, 6, 0] }}
           transition={{ repeat: Infinity, duration: 1.5 }}
           className="w-px h-8"
-          style={{ background: 'linear-gradient(to bottom, #555, transparent)' }}
+          style={{ background: 'linear-gradient(to bottom, #AAAAAA, transparent)' }}
         />
       </div>
     </div>
@@ -288,36 +298,52 @@ function HeroBanner({ banners }) {
 }
 
 /* ── USP strip ──────────────────────────────────────────────────── */
+const uspContainerVariants = {
+  hidden: {},
+  visible: { transition: { staggerChildren: 0.1 } },
+};
+const uspItemVariants = {
+  hidden: { opacity: 0, y: 20 },
+  visible: { opacity: 1, y: 0, transition: { duration: 0.5, ease: [0.22, 1, 0.36, 1] } },
+};
+
 function UspStrip({ featureBar }) {
   return (
-    <div style={{ background: '#111111', borderTop: '1px solid #222', borderBottom: '1px solid #222' }}>
+    <motion.div
+      style={{ background: '#FFFFFF', borderTop: '1px solid #E8E8E8', borderBottom: '1px solid #E8E8E8' }}
+      variants={uspContainerVariants}
+      initial="hidden"
+      whileInView="visible"
+      viewport={{ once: true, margin: '-60px' }}
+    >
       <div className="max-w-7xl mx-auto px-4">
-        <div className="grid grid-cols-2 md:grid-cols-4" style={{ borderRight: 'none' }}>
+        <div className="grid grid-cols-2 md:grid-cols-4">
           {featureBar.map((item, i) => (
-            <div
+            <motion.div
               key={i}
+              variants={uspItemVariants}
               className="flex items-center gap-3 py-4 px-5"
-              style={{ borderRight: i < featureBar.length - 1 ? '1px solid #222' : 'none' }}
+              style={{ borderRight: i < featureBar.length - 1 ? '1px solid #E8E8E8' : 'none' }}
             >
               {/* Icon: URL image or text/emoji */}
               <span className="flex-shrink-0 w-8 h-8 flex items-center justify-center">
                 {typeof item.icon === 'string' && item.icon.startsWith('http') ? (
                   <img src={item.icon} alt="" className="w-7 h-7 object-contain" />
                 ) : (
-                  <span className="text-xl" style={{ color: '#C8FF00' }}>
+                  <span className="text-xl" style={{ color: '#0A0A0A' }}>
                     {item.icon}
                   </span>
                 )}
               </span>
               <div>
-                <p className="text-[11px] sm:text-xs font-bold leading-tight text-white">{item.title}</p>
-                <p className="text-[10px] leading-tight" style={{ color: '#555' }}>{item.subtitle}</p>
+                <p className="text-[11px] sm:text-xs font-bold leading-tight" style={{ color: '#0A0A0A' }}>{item.title}</p>
+                <p className="text-[10px] leading-tight" style={{ color: '#666' }}>{item.subtitle}</p>
               </div>
-            </div>
+            </motion.div>
           ))}
         </div>
       </div>
-    </div>
+    </motion.div>
   );
 }
 
@@ -326,11 +352,17 @@ function DualMarquee({ items }) {
   const row1 = [...items, ...items];
   const row2 = [...items.slice().reverse(), ...items.slice().reverse()];
   return (
-    <div className="overflow-hidden select-none" style={{ background: '#0A0A0A' }}>
-      {/* Row 1 — left — white text, lime separators */}
+    <motion.div
+      className="overflow-hidden select-none"
+      initial={{ opacity: 0, scaleX: 0.95 }}
+      whileInView={{ opacity: 1, scaleX: 1 }}
+      viewport={{ once: true, margin: '-60px' }}
+      transition={{ duration: 0.6, ease: [0.22, 1, 0.36, 1] }}
+    >
+      {/* Row 1 — black bg, white text, lime separators */}
       <div
         className="py-3 overflow-hidden"
-        style={{ borderBottom: '1px solid #1a1a1a' }}
+        style={{ background: '#0A0A0A', borderBottom: '1px solid #1a1a1a' }}
       >
         <div className="marquee-track">
           {row1.map((item, i) => (
@@ -346,29 +378,35 @@ function DualMarquee({ items }) {
         </div>
       </div>
 
-      {/* Row 2 — right — lime text, white separators */}
-      <div className="py-3 overflow-hidden">
+      {/* Row 2 — lime bg, black text, white separators */}
+      <div className="py-3 overflow-hidden" style={{ background: '#C8FF00' }}>
         <div className="marquee-track-reverse">
           {row2.map((item, i) => (
             <span
               key={i}
               className="inline-flex items-center gap-3 px-6 text-[11px] font-bold tracking-[0.3em] uppercase"
-              style={{ color: '#C8FF00' }}
+              style={{ color: '#0A0A0A' }}
             >
-              <span style={{ color: 'rgba(255,255,255,0.3)', fontSize: '10px' }}>◆</span>
+              <span style={{ color: 'rgba(255,255,255,0.5)', fontSize: '10px' }}>◆</span>
               {item}
             </span>
           ))}
         </div>
       </div>
-    </div>
+    </motion.div>
   );
 }
 
 /* ── Section title ──────────────────────────────────────────────── */
 function SectionTitle({ title, sub, href, label = 'View All' }) {
   return (
-    <div className="flex items-end justify-between mb-5 sm:mb-6">
+    <motion.div
+      className="flex items-end justify-between mb-5 sm:mb-6"
+      initial={{ opacity: 0, y: 50 }}
+      whileInView={{ opacity: 1, y: 0 }}
+      viewport={{ once: true, margin: '-80px' }}
+      transition={{ duration: 0.7, ease: [0.22, 1, 0.36, 1] }}
+    >
       <div>
         {sub && (
           <p
@@ -380,7 +418,7 @@ function SectionTitle({ title, sub, href, label = 'View All' }) {
         )}
         <h2
           className="text-3xl sm:text-5xl font-black leading-none"
-          style={{ fontFamily: "'Bebas Neue', sans-serif", color: '#FFFFFF', letterSpacing: '0.02em' }}
+          style={{ fontFamily: "'Bebas Neue', sans-serif", color: '#0A0A0A', letterSpacing: '0.02em' }}
         >
           {title}
         </h2>
@@ -390,39 +428,39 @@ function SectionTitle({ title, sub, href, label = 'View All' }) {
         <Link
           to={href}
           className="flex-shrink-0 flex items-center gap-1.5 text-[11px] sm:text-xs font-bold px-4 py-2 rounded-full transition-all duration-200"
-          style={{ border: '1px solid #C8FF00', color: '#C8FF00' }}
+          style={{ border: '1px solid #0A0A0A', color: '#0A0A0A' }}
           onMouseEnter={e => {
-            e.currentTarget.style.background = '#C8FF00';
-            e.currentTarget.style.color = '#0A0A0A';
+            e.currentTarget.style.background = '#0A0A0A';
+            e.currentTarget.style.color = '#C8FF00';
           }}
           onMouseLeave={e => {
             e.currentTarget.style.background = 'transparent';
-            e.currentTarget.style.color = '#C8FF00';
+            e.currentTarget.style.color = '#0A0A0A';
           }}
         >
           {label} <FiArrowRight className="text-[10px]" />
         </Link>
       )}
-    </div>
+    </motion.div>
   );
 }
 
-/* ── Skeleton card (dark) ───────────────────────────────────────── */
+/* ── Skeleton card (light) ──────────────────────────────────────── */
 function Skel() {
   return (
     <div
       className="rounded-xl overflow-hidden animate-pulse"
-      style={{ background: '#111', border: '1px solid #222' }}
+      style={{ background: '#FFFFFF', border: '1px solid #E8E8E8' }}
     >
       <div
         className="aspect-[4/5]"
-        style={{ background: 'linear-gradient(135deg, #181818, #222)' }}
+        style={{ background: 'linear-gradient(135deg, #F8F8F8, #F0F0F0)' }}
       />
       <div className="p-3 space-y-2">
-        <div className="h-2 rounded w-1/3" style={{ background: '#222' }} />
-        <div className="h-3 rounded w-3/4" style={{ background: '#222' }} />
-        <div className="h-3 rounded w-1/2" style={{ background: '#222' }} />
-        <div className="h-8 rounded-xl mt-3" style={{ background: '#222' }} />
+        <div className="h-2 rounded w-1/3" style={{ background: '#E8E8E8' }} />
+        <div className="h-3 rounded w-3/4" style={{ background: '#E8E8E8' }} />
+        <div className="h-3 rounded w-1/2" style={{ background: '#E8E8E8' }} />
+        <div className="h-8 rounded-xl mt-3" style={{ background: '#E8E8E8' }} />
       </div>
     </div>
   );
@@ -431,51 +469,85 @@ function Skel() {
 /* ── Promo banner ───────────────────────────────────────────────── */
 function PromoBanner({ banner, className = '' }) {
   return (
-    <Link
-      to={banner.buttonLink || '/products'}
-      className={`relative overflow-hidden rounded-2xl flex items-end group ${className}`}
-      style={{ backgroundColor: banner.bgColor || '#111', minHeight: 220 }}
+    <motion.div
+      initial={{ opacity: 0, scale: 0.95 }}
+      whileInView={{ opacity: 1, scale: 1 }}
+      viewport={{ once: true, margin: '-60px' }}
+      transition={{ duration: 0.6, ease: [0.22, 1, 0.36, 1] }}
     >
-      {banner.image && (
-        <img
-          src={getImageUrl(banner.image)}
-          alt={banner.title}
-          className="absolute inset-0 w-full h-full object-cover group-hover:scale-105 transition-transform duration-700"
+      <Link
+        to={banner.buttonLink || '/products'}
+        className={`relative overflow-hidden rounded-2xl flex items-end group ${className}`}
+        style={{ backgroundColor: banner.bgColor || '#F5F5F5', minHeight: 220, border: '1px solid #E8E8E8' }}
+      >
+        {banner.image && (
+          <img
+            src={getImageUrl(banner.image)}
+            alt={banner.title}
+            className="absolute inset-0 w-full h-full object-cover group-hover:scale-105 transition-transform duration-700"
+          />
+        )}
+        <div
+          className="absolute inset-0"
+          style={{
+            background: banner.image
+              ? 'linear-gradient(to top, rgba(10,10,10,0.85) 0%, rgba(10,10,10,0.3) 50%, rgba(10,10,10,0.05) 100%)'
+              : 'linear-gradient(to top, rgba(0,0,0,0.07) 0%, rgba(0,0,0,0.02) 100%)',
+          }}
         />
-      )}
-      <div
-        className="absolute inset-0"
-        style={{
-          background: 'linear-gradient(to top, rgba(10,10,10,0.9) 0%, rgba(10,10,10,0.4) 50%, rgba(10,10,10,0.1) 100%)',
-        }}
-      />
-      <div className="relative z-10 p-5 sm:p-7 w-full">
-        <p
-          className="text-[10px] font-bold uppercase tracking-[0.25em] mb-1"
-          style={{ color: '#C8FF00' }}
-        >
-          {banner.subtitle}
-        </p>
-        <h3
-          className="text-3xl sm:text-5xl font-black text-white leading-none mb-3"
-          style={{ fontFamily: "'Bebas Neue', sans-serif" }}
-        >
-          {banner.title}
-        </h3>
-        <span
-          className="inline-flex items-center gap-2 text-xs font-bold px-4 py-2 rounded-full transition-all duration-200 group-hover:bg-[#C8FF00] group-hover:text-[#0A0A0A]"
-          style={{ border: '1px solid rgba(200,255,0,0.5)', color: '#C8FF00' }}
-        >
-          {banner.buttonText || 'Shop Now'} <FiArrowRight className="text-[10px]" />
-        </span>
-      </div>
-    </Link>
+        <div className="relative z-10 p-5 sm:p-7 w-full">
+          <p
+            className="text-[10px] font-bold uppercase tracking-[0.25em] mb-1"
+            style={{ color: banner.image ? '#C8FF00' : '#C8FF00' }}
+          >
+            {banner.subtitle}
+          </p>
+          <h3
+            className="text-3xl sm:text-5xl font-black leading-none mb-3"
+            style={{ fontFamily: "'Bebas Neue', sans-serif", color: banner.image ? '#FFFFFF' : '#0A0A0A' }}
+          >
+            {banner.title}
+          </h3>
+          <span
+            className="inline-flex items-center gap-2 text-xs font-bold px-4 py-2 rounded-full transition-all duration-200"
+            style={
+              banner.image
+                ? { border: '1px solid rgba(200,255,0,0.5)', color: '#C8FF00' }
+                : { border: '1px solid #0A0A0A', color: '#0A0A0A', background: 'transparent' }
+            }
+            onMouseEnter={e => {
+              if (banner.image) {
+                e.currentTarget.style.background = '#C8FF00';
+                e.currentTarget.style.color = '#0A0A0A';
+              } else {
+                e.currentTarget.style.background = '#0A0A0A';
+                e.currentTarget.style.color = '#C8FF00';
+              }
+            }}
+            onMouseLeave={e => {
+              if (banner.image) {
+                e.currentTarget.style.background = 'transparent';
+                e.currentTarget.style.color = '#C8FF00';
+              } else {
+                e.currentTarget.style.background = 'transparent';
+                e.currentTarget.style.color = '#0A0A0A';
+              }
+            }}
+          >
+            {banner.buttonText || 'Shop Now'} <FiArrowRight className="text-[10px]" />
+          </span>
+        </div>
+      </Link>
+    </motion.div>
   );
 }
 
 /* ── Category card with 3D tilt ─────────────────────────────────── */
-function CategoryCard({ cat }) {
+function CategoryCard({ cat, index = 0 }) {
   const ref = useRef(null);
+
+  /* Alternating: odd from left, even from right */
+  const xDir = index % 2 === 0 ? -40 : 40;
 
   const handleMove = (e) => {
     if (!ref.current) return;
@@ -490,61 +562,71 @@ function CategoryCard({ cat }) {
   };
 
   return (
-    <Link
-      ref={ref}
-      to={cat.href}
-      className="relative overflow-hidden rounded-2xl flex flex-col justify-end group"
-      style={{
-        backgroundColor: '#111',
-        minHeight: 'clamp(180px, 22vw, 280px)',
-        border: '1px solid #222',
-        transition: 'transform 0.3s cubic-bezier(0.22,1,0.36,1), box-shadow 0.3s',
-      }}
-      onMouseMove={handleMove}
-      onMouseLeave={handleLeave}
-      onMouseEnter={e => {
-        e.currentTarget.style.boxShadow = '0 0 30px rgba(200,255,0,0.1)';
-        e.currentTarget.style.borderColor = '#333';
-      }}
+    <motion.div
+      initial={{ opacity: 0, y: 40, x: xDir, scale: 0.95 }}
+      whileInView={{ opacity: 1, y: 0, x: 0, scale: 1 }}
+      viewport={{ once: true, margin: '-60px' }}
+      transition={{ duration: 0.6, delay: index * 0.1, ease: [0.22, 1, 0.36, 1] }}
     >
-      {cat.image ? (
-        <img
-          src={getImageUrl(cat.image)}
-          alt={cat.label}
-          className="absolute inset-0 w-full h-full object-cover group-hover:scale-105 transition-transform duration-700"
-        />
-      ) : (
+      <Link
+        ref={ref}
+        to={cat.href}
+        className="relative overflow-hidden rounded-2xl flex flex-col justify-end group block"
+        style={{
+          backgroundColor: '#F5F5F5',
+          minHeight: 'clamp(180px, 22vw, 280px)',
+          border: '1px solid #E8E8E8',
+          transition: 'transform 0.3s cubic-bezier(0.22,1,0.36,1), box-shadow 0.3s',
+        }}
+        onMouseMove={handleMove}
+        onMouseLeave={handleLeave}
+        onMouseEnter={e => {
+          e.currentTarget.style.boxShadow = '0 20px 60px rgba(0,0,0,0.1)';
+          e.currentTarget.style.borderColor = '#d0d0d0';
+        }}
+      >
+        {cat.image ? (
+          <img
+            src={getImageUrl(cat.image)}
+            alt={cat.label}
+            className="absolute inset-0 w-full h-full object-cover group-hover:scale-105 transition-transform duration-700"
+          />
+        ) : (
+          <div
+            className="absolute inset-0"
+            style={{
+              background: `linear-gradient(135deg, ${cat.bg || '#F5F5F5'} 0%, #EBEBEB 100%)`,
+            }}
+          />
+        )}
         <div
           className="absolute inset-0"
           style={{
-            background: `linear-gradient(135deg, ${cat.bg || '#111'} 0%, #0A0A0A 100%)`,
+            background: cat.image
+              ? 'linear-gradient(to top, rgba(10,10,10,0.8) 0%, rgba(10,10,10,0.2) 60%, transparent 100%)'
+              : 'linear-gradient(to top, rgba(0,0,0,0.08) 0%, rgba(0,0,0,0.02) 100%)',
           }}
         />
-      )}
-      <div
-        className="absolute inset-0"
-        style={{
-          background: 'linear-gradient(to top, rgba(10,10,10,0.88) 0%, rgba(10,10,10,0.3) 60%, transparent 100%)',
-        }}
-      />
-      <div className="relative z-10 p-4 sm:p-6">
-        <h3
-          className="font-black text-white text-2xl sm:text-3xl leading-none"
-          style={{ fontFamily: "'Bebas Neue', sans-serif" }}
-        >
-          {cat.label}
-        </h3>
-        <span
-          className="inline-flex items-center gap-1.5 mt-2 text-[11px] font-bold px-3 py-1.5 rounded-full transition-all duration-200"
-          style={{
-            border: '1px solid rgba(200,255,0,0.4)',
-            color: '#C8FF00',
-          }}
-        >
-          Shop Now <FiArrowRight className="text-[9px]" />
-        </span>
-      </div>
-    </Link>
+        <div className="relative z-10 p-4 sm:p-6">
+          <h3
+            className="font-black text-2xl sm:text-3xl leading-none"
+            style={{ fontFamily: "'Bebas Neue', sans-serif", color: cat.image ? '#FFFFFF' : '#0A0A0A' }}
+          >
+            {cat.label}
+          </h3>
+          <span
+            className="inline-flex items-center gap-1.5 mt-2 text-[11px] font-bold px-3 py-1.5 rounded-full transition-all duration-200"
+            style={
+              cat.image
+                ? { border: '1px solid rgba(200,255,0,0.4)', color: '#C8FF00' }
+                : { border: '1px solid #0A0A0A', color: '#0A0A0A' }
+            }
+          >
+            Shop Now <FiArrowRight className="text-[9px]" />
+          </span>
+        </div>
+      </Link>
+    </motion.div>
   );
 }
 
@@ -586,7 +668,7 @@ function ReviewCard({ review }) {
   return (
     <div
       className="flex-shrink-0 w-64 sm:w-72 p-5 rounded-2xl"
-      style={{ background: '#111', border: '1px solid #222' }}
+      style={{ background: '#FFFFFF', border: '1px solid #E8E8E8', boxShadow: '0 1px 4px rgba(0,0,0,0.04)' }}
     >
       <div className="flex items-center gap-0.5 mb-3">
         {[1, 2, 3, 4, 5].map((i) => (
@@ -594,7 +676,7 @@ function ReviewCard({ review }) {
             key={i}
             className="text-xs"
             style={{
-              color: i <= review.r ? '#C8FF00' : '#333',
+              color: i <= review.r ? '#C8FF00' : '#E8E8E8',
               fill: i <= review.r ? '#C8FF00' : 'none',
             }}
           />
@@ -608,7 +690,7 @@ function ReviewCard({ review }) {
       </div>
       <p
         className="text-xs sm:text-sm leading-relaxed mb-4 line-clamp-3"
-        style={{ color: '#aaa' }}
+        style={{ color: '#666' }}
       >
         "{review.text}"
       </p>
@@ -621,13 +703,13 @@ function ReviewCard({ review }) {
             {review.name[0]}
           </div>
           <div>
-            <p className="text-xs font-bold text-white leading-tight">{review.name}</p>
-            <p className="text-[10px]" style={{ color: '#555' }}>{review.city}</p>
+            <p className="text-xs font-bold leading-tight" style={{ color: '#0A0A0A' }}>{review.name}</p>
+            <p className="text-[10px]" style={{ color: '#AAAAAA' }}>{review.city}</p>
           </div>
         </div>
         <span
           className="text-[9px] font-semibold px-2 py-1 rounded-full"
-          style={{ background: '#181818', border: '1px solid #333', color: '#777' }}
+          style={{ background: '#F5F5F5', border: '1px solid #E8E8E8', color: '#666' }}
         >
           {review.product}
         </span>
@@ -648,6 +730,12 @@ const DEFAULT_FEATURE = [
   { icon: '✅', title: '100% Authentic',  subtitle: 'Every product' },
   { icon: '⚡', title: 'Fast Dispatch',   subtitle: 'Order by 2 PM' },
 ];
+
+/* stagger variants for product grids */
+const gridContainer = {
+  hidden: {},
+  visible: { transition: { staggerChildren: 0.07 } },
+};
 
 /* ═══════════════════════════════════════════════════════════════════ */
 export default function HomePage() {
@@ -710,18 +798,18 @@ export default function HomePage() {
         label: c.name,
         href:  `/collections/${c.slug}`,
         image: c.image || null,
-        bg:    '#111',
+        bg:    '#F5F5F5',
       }))
     : [
-        { label: 'Sneakers',         href: '/collections/sneakers',       image: null, bg: '#0D1117' },
-        { label: 'Casual Shoes',     href: '/collections/casual-shoes',   image: null, bg: '#0D0D0D' },
-        { label: 'Slippers & Clogs', href: '/collections/slippers-clogs', image: null, bg: '#0A0D0A' },
+        { label: 'Sneakers',         href: '/collections/sneakers',       image: null, bg: '#F0F0F0' },
+        { label: 'Casual Shoes',     href: '/collections/casual-shoes',   image: null, bg: '#F0F0F0' },
+        { label: 'Slippers & Clogs', href: '/collections/slippers-clogs', image: null, bg: '#F0F0F0' },
       ];
 
   const doubledReviews = [...ALL_REVIEWS, ...ALL_REVIEWS];
 
   return (
-    <div style={{ background: '#0A0A0A', color: '#fff' }}>
+    <div style={{ background: '#FFFFFF', color: '#0A0A0A' }}>
 
       {/* ══ A. HERO ══════════════════════════════════════════════════ */}
       <HeroBanner banners={banners} />
@@ -734,85 +822,111 @@ export default function HomePage() {
 
       {/* ══ D. CATEGORY STRIP ═══════════════════════════════════════ */}
       {siteSettings?.homepageShowCollections !== false && (
-        <Reveal className="py-12 sm:py-16 px-4 sm:px-6 max-w-7xl mx-auto">
+        <div className="py-12 sm:py-16 px-4 sm:px-6 max-w-7xl mx-auto" style={{ background: '#FFFFFF' }}>
           <SectionTitle title="SHOP BY COLLECTION" sub="Explore" />
           <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-4">
             {colTiles.map((cat, i) => (
-              <CategoryCard key={i} cat={cat} />
+              <CategoryCard key={i} cat={cat} index={i} />
             ))}
           </div>
-        </Reveal>
+        </div>
       )}
 
       {/* ══ E. NEW DROPS ═════════════════════════════════════════════ */}
       {siteSettings?.homepageShowNewArrivals !== false && (
-        <Reveal className="py-10 px-4 sm:px-6 max-w-7xl mx-auto">
+        <div className="py-10 px-4 sm:px-6 max-w-7xl mx-auto" style={{ background: '#FFFFFF' }}>
           <SectionTitle
             title="NEW DROPS"
             sub="Just Dropped"
             href="/products?newArrival=true"
           />
-          <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5 gap-3">
+          <motion.div
+            className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5 gap-3"
+            variants={gridContainer}
+            initial="hidden"
+            whileInView="visible"
+            viewport={{ once: true, margin: '-60px' }}
+          >
             {loadNA
               ? Array.from({ length: 5 }).map((_, i) => <Skel key={i} />)
               : (naProducts.length ? naProducts : allProducts).slice(0, 10).map((p, i) => (
                   <ProductCard key={p._id} product={p} index={i} />
                 ))}
-          </div>
-        </Reveal>
+          </motion.div>
+        </div>
       )}
 
       {/* ══ F. BEST SELLERS ══════════════════════════════════════════ */}
       {siteSettings?.homepageShowBestSellers !== false && (
-        <Reveal className="py-10 px-4 sm:px-6 max-w-7xl mx-auto">
+        <div className="py-10 px-4 sm:px-6 max-w-7xl mx-auto" style={{ background: '#F5F5F5' }}>
           <SectionTitle
             title="BEST SELLERS"
             sub="Top Picks"
             href="/products?bestSeller=true"
           />
-          <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5 gap-3">
+          <motion.div
+            className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5 gap-3"
+            variants={gridContainer}
+            initial="hidden"
+            whileInView="visible"
+            viewport={{ once: true, margin: '-60px' }}
+          >
             {loadBS
               ? Array.from({ length: 5 }).map((_, i) => <Skel key={i} />)
               : (bsProducts.length ? bsProducts : allProducts).slice(0, 10).map((p, i) => (
                   <ProductCard key={p._id} product={p} index={i} />
                 ))}
-          </div>
+          </motion.div>
           <div className="mt-8 flex justify-center">
-            <Link
-              to="/products"
-              className="inline-flex items-center gap-2 px-10 py-3 rounded-full text-sm font-black uppercase tracking-wider transition-all duration-200"
-              style={{ border: '2px solid #C8FF00', color: '#C8FF00' }}
-              onMouseEnter={e => {
-                e.currentTarget.style.background = '#C8FF00';
-                e.currentTarget.style.color = '#0A0A0A';
-                e.currentTarget.style.boxShadow = '0 0 24px rgba(200,255,0,0.4)';
-              }}
-              onMouseLeave={e => {
-                e.currentTarget.style.background = 'transparent';
-                e.currentTarget.style.color = '#C8FF00';
-                e.currentTarget.style.boxShadow = 'none';
-              }}
+            <motion.div
+              initial={{ opacity: 0, y: 20 }}
+              whileInView={{ opacity: 1, y: 0 }}
+              viewport={{ once: true, margin: '-60px' }}
+              transition={{ duration: 0.5 }}
             >
-              View All Products <FiArrowRight />
-            </Link>
+              <Link
+                to="/products"
+                className="inline-flex items-center gap-2 px-10 py-3 rounded-full text-sm font-black uppercase tracking-wider transition-all duration-200"
+                style={{ border: '2px solid #0A0A0A', color: '#0A0A0A' }}
+                onMouseEnter={e => {
+                  e.currentTarget.style.background = '#0A0A0A';
+                  e.currentTarget.style.color = '#C8FF00';
+                  e.currentTarget.style.boxShadow = '0 4px 20px rgba(0,0,0,0.15)';
+                }}
+                onMouseLeave={e => {
+                  e.currentTarget.style.background = 'transparent';
+                  e.currentTarget.style.color = '#0A0A0A';
+                  e.currentTarget.style.boxShadow = 'none';
+                }}
+              >
+                View All Products <FiArrowRight />
+              </Link>
+            </motion.div>
           </div>
-        </Reveal>
+        </div>
       )}
 
       {/* ══ G. PROMO BANNERS ═════════════════════════════════════════ */}
-      <Reveal className="py-8 px-4 sm:px-6 max-w-7xl mx-auto">
+      <div className="py-8 px-4 sm:px-6 max-w-7xl mx-auto">
         <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
           <PromoBanner banner={banner3} />
           <PromoBanner banner={banner4} />
         </div>
-      </Reveal>
+      </div>
 
       {/* ══ Second marquee between sections ════════════════════════ */}
       <DualMarquee items={marqueeItems} />
 
       {/* ══ H. REVIEWS AUTO-SCROLL ═══════════════════════════════════ */}
       {siteSettings?.homepageShowReviews !== false && (
-        <div className="py-12 sm:py-16" style={{ background: '#0A0A0A' }}>
+        <motion.div
+          className="py-12 sm:py-16"
+          style={{ background: '#F5F5F5' }}
+          initial={{ opacity: 0, y: 40 }}
+          whileInView={{ opacity: 1, y: 0 }}
+          viewport={{ once: true, margin: '-60px' }}
+          transition={{ duration: 0.7, ease: [0.22, 1, 0.36, 1] }}
+        >
           <div className="max-w-7xl mx-auto px-4 mb-6">
             <div className="flex flex-col sm:flex-row sm:items-end sm:justify-between gap-3">
               <div>
@@ -823,8 +937,8 @@ export default function HomePage() {
                   What People Say
                 </p>
                 <h2
-                  className="text-4xl sm:text-6xl font-black text-white"
-                  style={{ fontFamily: "'Bebas Neue', sans-serif" }}
+                  className="text-4xl sm:text-6xl font-black"
+                  style={{ fontFamily: "'Bebas Neue', sans-serif", color: '#0A0A0A' }}
                 >
                   CUSTOMER REVIEWS
                 </h2>
@@ -837,8 +951,8 @@ export default function HomePage() {
                     style={{ color: '#C8FF00', fill: '#C8FF00' }}
                   />
                 ))}
-                <span className="font-bold text-sm text-white ml-1">4.9</span>
-                <span className="text-xs" style={{ color: '#555' }}>(500+ reviews)</span>
+                <span className="font-bold text-sm ml-1" style={{ color: '#0A0A0A' }}>4.9</span>
+                <span className="text-xs" style={{ color: '#AAAAAA' }}>(500+ reviews)</span>
               </div>
             </div>
           </div>
@@ -847,11 +961,11 @@ export default function HomePage() {
             {/* Fade edges */}
             <div
               className="absolute left-0 top-0 bottom-0 w-10 sm:w-20 z-10 pointer-events-none"
-              style={{ background: 'linear-gradient(to right, #0A0A0A, transparent)' }}
+              style={{ background: 'linear-gradient(to right, #F5F5F5, transparent)' }}
             />
             <div
               className="absolute right-0 top-0 bottom-0 w-10 sm:w-20 z-10 pointer-events-none"
-              style={{ background: 'linear-gradient(to left, #0A0A0A, transparent)' }}
+              style={{ background: 'linear-gradient(to left, #F5F5F5, transparent)' }}
             />
             <div className="reviews-track px-2">
               {doubledReviews.map((review, i) => (
@@ -859,50 +973,65 @@ export default function HomePage() {
               ))}
             </div>
           </div>
-        </div>
+        </motion.div>
       )}
 
-      {/* ══ I. STATS ══════════════════════════════════════════════════ */}
-      <Reveal className="py-12 sm:py-16 px-4 sm:px-6 max-w-7xl mx-auto">
-        <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
-          {[
-            { from: 0, to: 10000, suffix: '+', label: 'Customers',        sub: 'Happy shoppers' },
-            { from: 0, to: 50,    suffix: '+', label: 'Styles',           sub: 'Unique designs' },
-            { from: 4, to: 4.8,   suffix: '★', label: 'Rating',           sub: 'Avg store rating' },
-            { from: 0, to: 100,   suffix: '%', label: 'Same Day Dispatch', sub: 'Order by 2 PM' },
-          ].map(({ from, to, suffix, label, sub }, i) => (
-            <motion.div
-              key={label}
-              initial={{ opacity: 0, y: 20 }}
-              whileInView={{ opacity: 1, y: 0 }}
-              viewport={{ once: true }}
-              transition={{ delay: i * 0.1 }}
-              className="rounded-2xl p-5 sm:p-6 text-center"
-              style={{ background: '#111', border: '1px solid #222' }}
-            >
-              <p
-                className="text-4xl sm:text-5xl font-black leading-none mb-1"
-                style={{ fontFamily: "'Bebas Neue', sans-serif", color: '#C8FF00' }}
+      {/* ══ I. STATS (dark bg for contrast) ══════════════════════════ */}
+      <motion.div
+        className="py-12 sm:py-16 px-4 sm:px-6"
+        style={{ background: '#0A0A0A' }}
+        initial={{ opacity: 0 }}
+        whileInView={{ opacity: 1 }}
+        viewport={{ once: true, margin: '-60px' }}
+        transition={{ duration: 0.5 }}
+      >
+        <div className="max-w-7xl mx-auto">
+          <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
+            {[
+              { from: 0, to: 10000, suffix: '+', label: 'Customers',        sub: 'Happy shoppers' },
+              { from: 0, to: 50,    suffix: '+', label: 'Styles',           sub: 'Unique designs' },
+              { from: 4, to: 4.8,   suffix: '★', label: 'Rating',           sub: 'Avg store rating' },
+              { from: 0, to: 100,   suffix: '%', label: 'Same Day Dispatch', sub: 'Order by 2 PM' },
+            ].map(({ from, to, suffix, label, sub }, i) => (
+              <motion.div
+                key={label}
+                initial={{ opacity: 0, y: 30 }}
+                whileInView={{ opacity: 1, y: 0 }}
+                viewport={{ once: true, margin: '-60px' }}
+                transition={{ delay: i * 0.15, duration: 0.6, ease: [0.22, 1, 0.36, 1] }}
+                className="rounded-2xl p-5 sm:p-6 text-center"
+                style={{ background: '#111', border: '1px solid #1a1a1a' }}
               >
-                <Counter from={from} to={to} suffix={suffix} />
-              </p>
-              <p className="text-sm font-bold text-white">{label}</p>
-              <p className="text-[10px] mt-0.5" style={{ color: '#555' }}>{sub}</p>
-            </motion.div>
-          ))}
+                <p
+                  className="text-4xl sm:text-5xl font-black leading-none mb-1"
+                  style={{ fontFamily: "'Bebas Neue', sans-serif", color: '#C8FF00' }}
+                >
+                  <Counter from={from} to={to} suffix={suffix} />
+                </p>
+                <p className="text-sm font-bold" style={{ color: '#FFFFFF' }}>{label}</p>
+                <p className="text-[10px] mt-0.5" style={{ color: '#666' }}>{sub}</p>
+              </motion.div>
+            ))}
+          </div>
         </div>
-      </Reveal>
+      </motion.div>
 
       {/* ══ J. NEWSLETTER ════════════════════════════════════════════ */}
-      <Reveal className="py-4 pb-12 px-4 sm:px-6 max-w-7xl mx-auto">
+      <motion.div
+        className="py-4 pb-12 px-4 sm:px-6 max-w-7xl mx-auto"
+        initial={{ opacity: 0, y: 40 }}
+        whileInView={{ opacity: 1, y: 0 }}
+        viewport={{ once: true, margin: '-60px' }}
+        transition={{ duration: 0.7, ease: [0.22, 1, 0.36, 1] }}
+      >
         <div
           className="rounded-2xl py-12 sm:py-16 px-5 sm:px-12 text-center relative overflow-hidden"
           style={{
-            background: 'linear-gradient(135deg, #111 0%, #0A0A0A 100%)',
-            border: '1px solid #222',
+            background: '#F5F5F5',
+            border: '1px solid #E8E8E8',
           }}
         >
-          {/* Lime glow accent */}
+          {/* Lime top accent line */}
           <div
             className="absolute top-0 left-1/2 -translate-x-1/2 w-64 h-px"
             style={{
@@ -918,12 +1047,12 @@ export default function HomePage() {
             Exclusive Access
           </p>
           <h2
-            className="text-4xl sm:text-6xl font-black text-white mb-3 leading-none"
-            style={{ fontFamily: "'Bebas Neue', sans-serif" }}
+            className="text-4xl sm:text-6xl font-black mb-3 leading-none"
+            style={{ fontFamily: "'Bebas Neue', sans-serif", color: '#0A0A0A' }}
           >
             GET FIRST ACCESS<br />TO NEW DROPS
           </h2>
-          <p className="text-sm mb-8 max-w-sm mx-auto" style={{ color: '#777' }}>
+          <p className="text-sm mb-8 max-w-sm mx-auto" style={{ color: '#666' }}>
             Early drops, member-only deals, and exclusive styles. Zero spam.
           </p>
 
@@ -936,28 +1065,28 @@ export default function HomePage() {
               placeholder="your@email.com"
               className="flex-1 px-4 py-3 rounded-xl text-sm min-w-0"
               style={{
-                background: '#0A0A0A',
-                border: '1px solid #333',
-                color: '#fff',
+                background: '#FFFFFF',
+                border: '1px solid #E8E8E8',
+                color: '#0A0A0A',
               }}
-              onFocus={e => { e.target.style.borderColor = '#C8FF00'; }}
-              onBlur={e => { e.target.style.borderColor = '#333'; }}
+              onFocus={e => { e.target.style.borderColor = '#0A0A0A'; }}
+              onBlur={e => { e.target.style.borderColor = '#E8E8E8'; }}
             />
             <button
               type="submit"
               className="flex-shrink-0 px-6 py-3 rounded-xl text-sm font-black uppercase tracking-wider transition-all duration-200"
-              style={{ background: '#C8FF00', color: '#0A0A0A' }}
-              onMouseEnter={e => { e.currentTarget.style.boxShadow = '0 0 20px rgba(200,255,0,0.5)'; }}
+              style={{ background: '#0A0A0A', color: '#C8FF00' }}
+              onMouseEnter={e => { e.currentTarget.style.boxShadow = '0 0 20px rgba(200,255,0,0.3), 0 4px 16px rgba(0,0,0,0.2)'; }}
               onMouseLeave={e => { e.currentTarget.style.boxShadow = 'none'; }}
             >
               Join
             </button>
           </form>
-          <p className="text-[10px] mt-3" style={{ color: '#444' }}>
+          <p className="text-[10px] mt-3" style={{ color: '#AAAAAA' }}>
             Unsubscribe anytime · No spam ever
           </p>
         </div>
-      </Reveal>
+      </motion.div>
 
     </div>
   );

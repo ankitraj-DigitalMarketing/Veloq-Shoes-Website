@@ -91,7 +91,7 @@ export default function Navbar() {
       {announcementText && (
         <div
           className="fixed top-0 left-0 right-0 z-50 text-center text-[11px] py-1.5 tracking-widest font-bold uppercase"
-          style={{ background: '#0A0A0A', color: '#C8FF00', borderBottom: '1px solid #222' }}
+          style={{ background: '#0A0A0A', color: '#ffffff', borderBottom: '1px solid #1a1a1a' }}
         >
           {announcementText}
         </div>
@@ -104,11 +104,11 @@ export default function Navbar() {
           announcementText ? 'top-[30px]' : 'top-0'
         )}
         style={{
-          background: scrolled ? 'rgba(10,10,10,0.97)' : 'rgba(10,10,10,0.95)',
+          background: scrolled ? 'rgba(255,255,255,0.98)' : 'rgba(255,255,255,0.95)',
           backdropFilter: 'blur(20px)',
           WebkitBackdropFilter: 'blur(20px)',
-          borderBottom: '1px solid #222222',
-          boxShadow: scrolled ? '0 4px 30px rgba(0,0,0,0.5)' : 'none',
+          borderBottom: '1px solid #E8E8E8',
+          boxShadow: scrolled ? '0 2px 20px rgba(0,0,0,0.06)' : 'none',
         }}
       >
         <div className="max-w-7xl mx-auto px-4 sm:px-6">
@@ -126,13 +126,9 @@ export default function Navbar() {
                     className={clsx(
                       'px-3 py-1.5 rounded-lg text-[11px] font-semibold tracking-wide uppercase transition-all duration-200 whitespace-nowrap',
                       isActive(c.href)
-                        ? 'text-[#C8FF00]'
-                        : 'text-[#777] hover:text-white'
+                        ? 'text-[#0A0A0A] bg-[#C8FF00]'
+                        : 'text-[#666] hover:text-[#0A0A0A]'
                     )}
-                    style={isActive(c.href) ? {
-                      borderBottom: '2px solid #C8FF00',
-                      paddingBottom: '4px',
-                    } : {}}
                   >
                     {c.label}
                   </Link>
@@ -141,8 +137,8 @@ export default function Navbar() {
 
               <button
                 onClick={() => setMenuOpen(!menuOpen)}
-                className="lg:hidden w-9 h-9 flex items-center justify-center rounded-lg text-white hover:text-[#C8FF00] transition-colors"
-                style={{ background: 'rgba(255,255,255,0.05)' }}
+                className="lg:hidden w-9 h-9 flex items-center justify-center rounded-lg text-[#0A0A0A] hover:text-[#C8FF00] transition-colors"
+                style={{ background: 'rgba(0,0,0,0.04)' }}
               >
                 {menuOpen ? <FiX className="text-xl" /> : <HiOutlineMenuAlt3 className="text-xl" />}
               </button>
@@ -152,7 +148,7 @@ export default function Navbar() {
             <div className="absolute left-1/2 -translate-x-1/2 pointer-events-none">
               <Link to="/" className="pointer-events-auto group">
                 <span
-                  className="font-display text-2xl tracking-[0.2em] text-white leading-none select-none"
+                  className="font-display text-2xl tracking-[0.2em] text-[#0A0A0A] leading-none select-none"
                   style={{ fontFamily: "'Bebas Neue', sans-serif", letterSpacing: '0.2em' }}
                 >
                   VELO<span className="group-hover:text-[#C8FF00] transition-colors duration-200">Q</span>
@@ -165,7 +161,7 @@ export default function Navbar() {
 
               <button
                 onClick={() => setSearchOpen(!searchOpen)}
-                className="w-9 h-9 flex items-center justify-center rounded-lg text-[#777] hover:text-[#C8FF00] transition-colors"
+                className="w-9 h-9 flex items-center justify-center rounded-lg text-[#666] hover:text-[#0A0A0A] transition-colors"
                 aria-label="Search"
               >
                 {searchOpen ? <FiX className="text-lg" /> : <FiSearch className="text-lg" />}
@@ -173,14 +169,14 @@ export default function Navbar() {
 
               <Link
                 to="/wishlist"
-                className="w-9 h-9 flex items-center justify-center rounded-lg text-[#777] hover:text-[#C8FF00] transition-colors"
+                className="w-9 h-9 flex items-center justify-center rounded-lg text-[#666] hover:text-[#0A0A0A] transition-colors"
               >
                 <FiHeart className="text-lg" />
               </Link>
 
               <button
                 onClick={openCart}
-                className="relative w-9 h-9 flex items-center justify-center rounded-lg text-[#777] hover:text-[#C8FF00] transition-colors"
+                className="relative w-9 h-9 flex items-center justify-center rounded-lg text-[#666] hover:text-[#0A0A0A] transition-colors"
                 aria-label="Open cart"
               >
                 <FiShoppingCart className="text-lg" />
@@ -203,7 +199,7 @@ export default function Navbar() {
                 <div className="relative" ref={userRef}>
                   <button
                     onClick={() => setUserOpen(!userOpen)}
-                    className="flex items-center gap-1 p-1.5 rounded-lg transition-colors hover:bg-white/5"
+                    className="flex items-center gap-1 p-1.5 rounded-lg transition-colors hover:bg-black/5"
                   >
                     <div
                       className="w-7 h-7 rounded-full text-xs font-bold flex items-center justify-center"
@@ -213,7 +209,7 @@ export default function Navbar() {
                     </div>
                     <FiChevronDown
                       className={clsx(
-                        'text-xs text-[#777] transition-transform hidden md:block',
+                        'text-xs text-[#666] transition-transform hidden md:block',
                         userOpen && 'rotate-180'
                       )}
                     />
@@ -227,43 +223,43 @@ export default function Navbar() {
                         transition={{ duration: 0.15 }}
                         className="absolute right-0 top-11 w-52 rounded-xl py-2 z-50"
                         style={{
-                          background: '#111111',
-                          border: '1px solid #222222',
-                          boxShadow: '0 8px 32px rgba(0,0,0,0.6)',
+                          background: '#FFFFFF',
+                          border: '1px solid #E8E8E8',
+                          boxShadow: '0 8px 32px rgba(0,0,0,0.12)',
                         }}
                       >
                         <div
                           className="px-4 py-2 mb-1"
-                          style={{ borderBottom: '1px solid #222' }}
+                          style={{ borderBottom: '1px solid #E8E8E8' }}
                         >
-                          <p className="text-xs font-semibold text-white truncate">{user?.name}</p>
-                          <p className="text-[10px] text-[#777] truncate">{user?.email}</p>
+                          <p className="text-xs font-semibold text-[#0A0A0A] truncate">{user?.name}</p>
+                          <p className="text-[10px] text-[#666] truncate">{user?.email}</p>
                         </div>
                         <Link
                           to="/account"
-                          className="flex items-center gap-2.5 px-4 py-2 text-sm text-[#aaa] hover:text-[#C8FF00] hover:bg-white/5 transition-colors"
+                          className="flex items-center gap-2.5 px-4 py-2 text-sm text-[#666] hover:text-[#0A0A0A] hover:bg-black/4 transition-colors"
                         >
                           <FiUser className="text-sm" /> My Account
                         </Link>
                         <Link
                           to="/orders"
-                          className="flex items-center gap-2.5 px-4 py-2 text-sm text-[#aaa] hover:text-[#C8FF00] hover:bg-white/5 transition-colors"
+                          className="flex items-center gap-2.5 px-4 py-2 text-sm text-[#666] hover:text-[#0A0A0A] hover:bg-black/4 transition-colors"
                         >
                           <FiPackage className="text-sm" /> My Orders
                         </Link>
                         {user?.role === 'admin' && (
                           <Link
                             to="/admin"
-                            className="flex items-center gap-2.5 px-4 py-2 text-sm font-semibold hover:bg-white/5 transition-colors"
+                            className="flex items-center gap-2.5 px-4 py-2 text-sm font-semibold hover:bg-black/4 transition-colors"
                             style={{ color: '#C8FF00' }}
                           >
                             Admin Panel
                           </Link>
                         )}
-                        <div className="mt-1 pt-1" style={{ borderTop: '1px solid #222' }}>
+                        <div className="mt-1 pt-1" style={{ borderTop: '1px solid #E8E8E8' }}>
                           <button
                             onClick={logout}
-                            className="w-full flex items-center gap-2.5 px-4 py-2 text-sm text-[#FF3366] hover:bg-white/5 transition-colors"
+                            className="w-full flex items-center gap-2.5 px-4 py-2 text-sm text-[#FF3366] hover:bg-black/4 transition-colors"
                           >
                             <FiLogOut className="text-sm" /> Sign Out
                           </button>
@@ -277,16 +273,16 @@ export default function Navbar() {
                   to="/login"
                   className="hidden sm:flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-xs font-semibold transition-all"
                   style={{
-                    border: '1px solid #333',
-                    color: '#aaa',
+                    border: '1px solid #E8E8E8',
+                    color: '#666',
                   }}
                   onMouseEnter={e => {
-                    e.currentTarget.style.borderColor = '#C8FF00';
-                    e.currentTarget.style.color = '#C8FF00';
+                    e.currentTarget.style.borderColor = '#0A0A0A';
+                    e.currentTarget.style.color = '#0A0A0A';
                   }}
                   onMouseLeave={e => {
-                    e.currentTarget.style.borderColor = '#333';
-                    e.currentTarget.style.color = '#aaa';
+                    e.currentTarget.style.borderColor = '#E8E8E8';
+                    e.currentTarget.style.color = '#666';
                   }}
                 >
                   <FiUser className="text-sm" /> Sign In
@@ -305,7 +301,7 @@ export default function Navbar() {
               exit={{ height: 0, opacity: 0 }}
               transition={{ duration: 0.2 }}
               className="overflow-hidden"
-              style={{ borderTop: '1px solid #222', background: '#111' }}
+              style={{ borderTop: '1px solid #E8E8E8', background: '#FFFFFF' }}
             >
               <div className="max-w-2xl mx-auto p-3 pb-4">
                 <form onSubmit={handleSearch} className="flex gap-2">
@@ -317,15 +313,15 @@ export default function Navbar() {
                     placeholder="Search shoes, styles, sizes..."
                     className="flex-1 px-4 py-2.5 rounded-xl text-sm min-w-0"
                     style={{
-                      background: '#0A0A0A',
-                      border: '1px solid #333',
-                      color: '#fff',
+                      background: '#F8F8F8',
+                      border: '1px solid #E8E8E8',
+                      color: '#0A0A0A',
                     }}
                   />
                   <button
                     type="submit"
                     className="flex-shrink-0 px-5 py-2.5 rounded-xl text-sm font-black flex items-center gap-1.5 transition-all"
-                    style={{ background: '#C8FF00', color: '#0A0A0A' }}
+                    style={{ background: '#0A0A0A', color: '#C8FF00' }}
                   >
                     <FiSearch className="text-sm" /> Search
                   </button>
@@ -338,8 +334,8 @@ export default function Navbar() {
                         navigate(`/products?search=${term}`);
                         setSearchOpen(false);
                       }}
-                      className="text-[11px] text-[#777] hover:text-[#C8FF00] rounded-full px-3 py-1 transition-colors"
-                      style={{ border: '1px solid #333' }}
+                      className="text-[11px] text-[#666] hover:text-[#0A0A0A] rounded-full px-3 py-1 transition-colors"
+                      style={{ border: '1px solid #E8E8E8' }}
                     >
                       {term}
                     </button>
@@ -360,7 +356,7 @@ export default function Navbar() {
               animate={{ opacity: 1 }}
               exit={{ opacity: 0 }}
               className="fixed inset-0 z-[55]"
-              style={{ background: 'rgba(0,0,0,0.7)', backdropFilter: 'blur(4px)' }}
+              style={{ background: 'rgba(0,0,0,0.3)', backdropFilter: 'blur(4px)' }}
               onClick={() => setMenuOpen(false)}
             />
             <motion.div
@@ -370,25 +366,25 @@ export default function Navbar() {
               transition={{ type: 'spring', damping: 30, stiffness: 300 }}
               className="fixed top-0 left-0 bottom-0 w-72 z-[56] flex flex-col"
               style={{
-                background: '#0A0A0A',
-                borderRight: '1px solid #222',
-                boxShadow: '4px 0 40px rgba(0,0,0,0.8)',
+                background: '#FFFFFF',
+                borderRight: '1px solid #E8E8E8',
+                boxShadow: '4px 0 40px rgba(0,0,0,0.1)',
               }}
             >
               <div
                 className="flex items-center justify-between px-5 py-4"
-                style={{ borderBottom: '1px solid #222' }}
+                style={{ borderBottom: '1px solid #E8E8E8' }}
               >
                 <span
-                  className="text-white text-2xl tracking-widest"
+                  className="text-[#0A0A0A] text-2xl tracking-widest"
                   style={{ fontFamily: "'Bebas Neue', sans-serif" }}
                 >
                   VELO<span style={{ color: '#C8FF00' }}>Q</span>
                 </span>
                 <button
                   onClick={() => setMenuOpen(false)}
-                  className="w-8 h-8 flex items-center justify-center rounded-lg text-[#777] hover:text-[#C8FF00] transition-colors"
-                  style={{ background: 'rgba(255,255,255,0.05)' }}
+                  className="w-8 h-8 flex items-center justify-center rounded-lg text-[#666] hover:text-[#0A0A0A] transition-colors"
+                  style={{ background: 'rgba(0,0,0,0.04)' }}
                 >
                   <FiX />
                 </button>
@@ -413,10 +409,9 @@ export default function Navbar() {
                       className={clsx(
                         'flex items-center py-3 px-3 rounded-xl mb-0.5 text-sm font-semibold transition-all',
                         isActive(c.href)
-                          ? 'text-[#C8FF00]'
-                          : 'text-[#aaa] hover:text-white hover:bg-white/5'
+                          ? 'text-[#0A0A0A] bg-[#C8FF00]'
+                          : 'text-[#666] hover:text-[#0A0A0A] hover:bg-black/5'
                       )}
-                      style={isActive(c.href) ? { background: 'rgba(200,255,0,0.08)' } : {}}
                     >
                       {c.label}
                     </Link>
@@ -425,48 +420,48 @@ export default function Navbar() {
               </nav>
 
               {!isAuthenticated() ? (
-                <div className="p-4 space-y-2" style={{ borderTop: '1px solid #222' }}>
+                <div className="p-4 space-y-2" style={{ borderTop: '1px solid #E8E8E8' }}>
                   <Link
                     to="/login"
                     className="block w-full text-center py-3 text-sm font-black rounded-xl transition-all"
-                    style={{ background: '#C8FF00', color: '#0A0A0A' }}
+                    style={{ background: '#0A0A0A', color: '#C8FF00' }}
                   >
                     Sign In
                   </Link>
                   <Link
                     to="/register"
                     className="block w-full text-center py-3 text-sm font-bold rounded-xl transition-all"
-                    style={{ border: '1px solid #C8FF00', color: '#C8FF00' }}
+                    style={{ border: '2px solid #0A0A0A', color: '#0A0A0A' }}
                   >
                     Create Account
                   </Link>
                 </div>
               ) : (
-                <div className="p-3 space-y-0.5" style={{ borderTop: '1px solid #222' }}>
+                <div className="p-3 space-y-0.5" style={{ borderTop: '1px solid #E8E8E8' }}>
                   <Link
                     to="/account"
-                    className="flex items-center gap-2.5 py-2.5 px-3 rounded-xl text-sm font-medium text-[#aaa] hover:text-[#C8FF00] hover:bg-white/5 transition-colors"
+                    className="flex items-center gap-2.5 py-2.5 px-3 rounded-xl text-sm font-medium text-[#666] hover:text-[#0A0A0A] hover:bg-black/5 transition-colors"
                   >
-                    <FiUser className="text-[#777]" /> My Account
+                    <FiUser className="text-[#666]" /> My Account
                   </Link>
                   <Link
                     to="/orders"
-                    className="flex items-center gap-2.5 py-2.5 px-3 rounded-xl text-sm font-medium text-[#aaa] hover:text-[#C8FF00] hover:bg-white/5 transition-colors"
+                    className="flex items-center gap-2.5 py-2.5 px-3 rounded-xl text-sm font-medium text-[#666] hover:text-[#0A0A0A] hover:bg-black/5 transition-colors"
                   >
-                    <FiPackage className="text-[#777]" /> My Orders
+                    <FiPackage className="text-[#666]" /> My Orders
                   </Link>
                   {user?.role === 'admin' && (
                     <Link
                       to="/admin"
-                      className="flex items-center gap-2.5 py-2.5 px-3 rounded-xl text-sm font-semibold hover:bg-white/5 transition-colors"
-                      style={{ color: '#C8FF00' }}
+                      className="flex items-center gap-2.5 py-2.5 px-3 rounded-xl text-sm font-semibold hover:bg-black/5 transition-colors"
+                      style={{ color: '#0A0A0A', background: '#C8FF00' }}
                     >
                       Admin Panel
                     </Link>
                   )}
                   <button
                     onClick={logout}
-                    className="w-full flex items-center gap-2.5 py-2.5 px-3 rounded-xl text-sm font-medium hover:bg-white/5 transition-colors"
+                    className="w-full flex items-center gap-2.5 py-2.5 px-3 rounded-xl text-sm font-medium hover:bg-red-50 transition-colors"
                     style={{ color: '#FF3366' }}
                   >
                     <FiLogOut /> Sign Out

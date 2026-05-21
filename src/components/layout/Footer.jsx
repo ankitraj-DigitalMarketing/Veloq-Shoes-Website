@@ -30,18 +30,18 @@ function AccordionSection({ title, children }) {
       {/* Mobile: tappable header */}
       <button
         className="md:hidden flex items-center justify-between w-full py-3.5"
-        style={{ borderBottom: '1px solid #222' }}
+        style={{ borderBottom: '1px solid #E8E8E8' }}
         onClick={() => setOpen(!open)}
       >
         <span
           className="text-[11px] tracking-[0.25em] uppercase font-bold"
-          style={{ color: '#C8FF00' }}
+          style={{ color: '#0A0A0A' }}
         >
           {title}
         </span>
         <FiChevronDown
           className={`text-sm transition-transform duration-200 flex-shrink-0 ${open ? 'rotate-180' : ''}`}
-          style={{ color: '#777' }}
+          style={{ color: '#666' }}
         />
       </button>
 
@@ -65,7 +65,7 @@ function AccordionSection({ title, children }) {
       <div className="hidden md:block">
         <p
           className="text-[10px] tracking-[0.3em] uppercase font-bold mb-4"
-          style={{ color: '#C8FF00' }}
+          style={{ color: '#0A0A0A' }}
         >
           {title}
         </p>
@@ -77,7 +77,7 @@ function AccordionSection({ title, children }) {
 
 export default function Footer() {
   return (
-    <footer style={{ background: '#0A0A0A', borderTop: '1px solid #222' }}>
+    <footer style={{ background: '#F5F5F5', borderTop: '1px solid #E8E8E8' }}>
       <div className="max-w-7xl mx-auto px-6 pt-10 pb-6">
 
         <div className="grid grid-cols-1 md:grid-cols-4 gap-0 md:gap-10 mb-6 md:mb-10">
@@ -85,17 +85,17 @@ export default function Footer() {
           {/* Brand */}
           <div
             className="md:col-span-1 py-5 md:py-0"
-            style={{ borderBottom: '1px solid #222' }}
+            style={{ borderBottom: '1px solid #E8E8E8' }}
           >
             <Link to="/" className="inline-block group mb-3">
               <span
-                className="font-display text-5xl tracking-[0.2em] text-white"
+                className="font-display text-5xl tracking-[0.2em] text-[#0A0A0A]"
                 style={{ fontFamily: "'Bebas Neue', sans-serif" }}
               >
                 VELO<span className="group-hover:text-[#C8FF00] transition-colors duration-200">Q</span>
               </span>
             </Link>
-            <p className="text-sm leading-relaxed max-w-xs" style={{ color: '#777' }}>
+            <p className="text-sm leading-relaxed max-w-xs" style={{ color: '#666' }}>
               Premium men's footwear. Every pair tells a story.
             </p>
             <div className="flex gap-3 mt-5">
@@ -105,15 +105,15 @@ export default function Footer() {
                   href="#"
                   whileHover={{ scale: 1.1 }}
                   className="w-9 h-9 rounded-full flex items-center justify-center transition-all duration-200"
-                  style={{ border: '1px solid #333', color: '#777' }}
+                  style={{ border: '1px solid #E8E8E8', color: '#666', background: '#FFFFFF' }}
                   onMouseEnter={e => {
-                    e.currentTarget.style.borderColor = '#C8FF00';
-                    e.currentTarget.style.color = '#C8FF00';
-                    e.currentTarget.style.boxShadow = '0 0 12px rgba(200,255,0,0.3)';
+                    e.currentTarget.style.borderColor = '#0A0A0A';
+                    e.currentTarget.style.color = '#0A0A0A';
+                    e.currentTarget.style.boxShadow = '0 2px 8px rgba(0,0,0,0.1)';
                   }}
                   onMouseLeave={e => {
-                    e.currentTarget.style.borderColor = '#333';
-                    e.currentTarget.style.color = '#777';
+                    e.currentTarget.style.borderColor = '#E8E8E8';
+                    e.currentTarget.style.color = '#666';
                     e.currentTarget.style.boxShadow = 'none';
                   }}
                 >
@@ -131,9 +131,9 @@ export default function Footer() {
                   <Link
                     to={link.href}
                     className="text-sm py-1.5 md:py-0 block transition-colors duration-200"
-                    style={{ color: '#777' }}
-                    onMouseEnter={e => { e.currentTarget.style.color = '#C8FF00'; }}
-                    onMouseLeave={e => { e.currentTarget.style.color = '#777'; }}
+                    style={{ color: '#666' }}
+                    onMouseEnter={e => { e.currentTarget.style.color = '#0A0A0A'; }}
+                    onMouseLeave={e => { e.currentTarget.style.color = '#666'; }}
                   >
                     {link.label}
                   </Link>
@@ -150,9 +150,9 @@ export default function Footer() {
                   <Link
                     to={link.href}
                     className="text-sm py-1.5 md:py-0 block transition-colors duration-200"
-                    style={{ color: '#777' }}
-                    onMouseEnter={e => { e.currentTarget.style.color = '#C8FF00'; }}
-                    onMouseLeave={e => { e.currentTarget.style.color = '#777'; }}
+                    style={{ color: '#666' }}
+                    onMouseEnter={e => { e.currentTarget.style.color = '#0A0A0A'; }}
+                    onMouseLeave={e => { e.currentTarget.style.color = '#666'; }}
                   >
                     {link.label}
                   </Link>
@@ -168,7 +168,7 @@ export default function Footer() {
                 <span
                   key={p}
                   className="text-[10px] px-2.5 py-1 rounded font-medium"
-                  style={{ border: '1px solid #333', color: '#777' }}
+                  style={{ border: '1px solid #E8E8E8', color: '#666', background: '#FFFFFF' }}
                 >
                   {p}
                 </span>
@@ -176,7 +176,7 @@ export default function Footer() {
             </div>
             <p
               className="text-[10px] tracking-widest uppercase font-bold mb-2 md:mb-3"
-              style={{ color: '#C8FF00' }}
+              style={{ color: '#0A0A0A' }}
             >
               Delivery By
             </p>
@@ -185,7 +185,7 @@ export default function Footer() {
                 <span
                   key={c}
                   className="text-[10px] px-2.5 py-1 rounded"
-                  style={{ border: '1px solid #333', color: '#777' }}
+                  style={{ border: '1px solid #E8E8E8', color: '#666', background: '#FFFFFF' }}
                 >
                   {c}
                 </span>
@@ -197,9 +197,9 @@ export default function Footer() {
         {/* Bottom bar */}
         <div
           className="pt-5 flex flex-col md:flex-row items-center justify-between gap-3"
-          style={{ borderTop: '1px solid #222' }}
+          style={{ borderTop: '1px solid #E8E8E8' }}
         >
-          <p className="text-xs" style={{ color: '#555' }}>
+          <p className="text-xs" style={{ color: '#AAAAAA' }}>
             © {new Date().getFullYear()} VELOQ. All rights reserved.
           </p>
           <div className="flex gap-5">
@@ -208,9 +208,9 @@ export default function Footer() {
                 key={t}
                 href="#"
                 className="text-xs transition-colors duration-200"
-                style={{ color: '#555' }}
-                onMouseEnter={e => { e.currentTarget.style.color = '#C8FF00'; }}
-                onMouseLeave={e => { e.currentTarget.style.color = '#555'; }}
+                style={{ color: '#AAAAAA' }}
+                onMouseEnter={e => { e.currentTarget.style.color = '#0A0A0A'; }}
+                onMouseLeave={e => { e.currentTarget.style.color = '#AAAAAA'; }}
               >
                 {t}
               </a>
