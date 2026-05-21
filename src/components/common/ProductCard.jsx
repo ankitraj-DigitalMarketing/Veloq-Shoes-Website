@@ -1,6 +1,6 @@
-import { useState } from 'react';
+import { useState, useRef } from 'react';
 import { Link } from 'react-router-dom';
-import { motion } from 'framer-motion';
+import { motion, useMotionValue, useTransform, useSpring } from 'framer-motion';
 import { FiHeart, FiShoppingCart, FiStar, FiCheck } from 'react-icons/fi';
 import { formatPrice, getDiscountPercent, getImageUrl } from '../../utils/helpers';
 import useCartStore from '../../store/cartStore';
@@ -10,15 +10,39 @@ import clsx from 'clsx';
 
 export default function ProductCard({ product, index = 0 }) {
   const [added, setAdded] = useState(false);
+  const cardRef = useRef(null);
 
-  const { addToCart } = useCartStore();
+  const { addToCart }      = useCartStore();
   const { toggle, isInWishlist } = useWishlistStore();
   const { isAuthenticated } = useAuthStore();
 
-  const discount = getDiscountPercent(product.price, product.comparePrice);
+  const discount   = getDiscountPercent(product.price, product.comparePrice);
   const inWishlist = isInWishlist(product._id);
-  const sizes = [...new Set(product.variants?.map((v) => v.size))].slice(0, 4);
-  const lowStock = product.variants?.some((v) => v.stock > 0 && v.stock <= 3);
+  const sizes      = [...new Set(product.variants?.map((v) => v.size))].slice(0, 4);
+  const lowStock   = product.variants?.some((v) => v.stock > 0 && v.stock <= 3);
+
+  /* 3-D tilt via Framer Motion */
+  const mouseX = useMotionValue(0);
+  const mouseY = useMotionValue(0);
+
+  const rotateX = useSpring(useTransform(mouseY, [-0.5, 0.5], [6, -6]), {
+    stiffness: 300, damping: 30,
+  });
+  const rotateY = useSpring(useTransform(mouseX, [-0.5, 0.5], [-8, 8]), {
+    stiffness: 300, damping: 30,
+  });
+
+  const handleMouseMove = (e) => {
+    if (!cardRef.current) return;
+    const rect = cardRef.current.getBoundingClientRect();
+    mouseX.set((e.clientX - rect.left) / rect.width - 0.5);
+    mouseY.set((e.clientY - rect.top)  / rect.height - 0.5);
+  };
+
+  const handleMouseLeave = () => {
+    mouseX.set(0);
+    mouseY.set(0);
+  };
 
   const handleAdd = (e) => {
     e.preventDefault();
@@ -36,58 +60,98 @@ export default function ProductCard({ product, index = 0 }) {
 
   return (
     <motion.div
-      initial={{ opacity: 0, y: 20 }}
-      whileInView={{ opacity: 1, y: 0 }}
+      ref={cardRef}
+      initial={{ opacity: 0, y: 30, rotateX: 15 }}
+      whileInView={{ opacity: 1, y: 0, rotateX: 0 }}
       viewport={{ once: true, margin: '-40px' }}
-      transition={{ duration: 0.35, delay: index * 0.05 }}
-      whileHover={{ scale: 1.015, transition: { duration: 0.2 } }}
+      transition={{ duration: 0.45, delay: index * 0.05, ease: [0.22, 1, 0.36, 1] }}
+      style={{
+        perspective: '1200px',
+        rotateX,
+        rotateY,
+        transformStyle: 'preserve-3d',
+      }}
+      onMouseMove={handleMouseMove}
+      onMouseLeave={handleMouseLeave}
     >
       <Link
         to={`/products/${product.slug}`}
-        className="block bg-white border border-gray-200 rounded-xl overflow-hidden hover:shadow-lg hover:border-gray-300 transition-all duration-300"
+        className="block rounded-xl overflow-hidden transition-all duration-300 group"
+        style={{
+          background: '#111111',
+          border: '1px solid #222222',
+          boxShadow: '0 4px 24px rgba(0,0,0,0.4)',
+        }}
+        onMouseEnter={e => {
+          e.currentTarget.style.borderColor = '#333';
+          e.currentTarget.style.boxShadow = '0 8px 40px rgba(0,0,0,0.6), 0 0 20px rgba(200,255,0,0.05)';
+        }}
+        onMouseLeave={e => {
+          e.currentTarget.style.borderColor = '#222';
+          e.currentTarget.style.boxShadow = '0 4px 24px rgba(0,0,0,0.4)';
+        }}
       >
         {/* Image */}
-        <div className="relative product-img-wrap aspect-[4/5] bg-gray-50">
+        <div
+          className="relative product-img-wrap aspect-[4/5]"
+          style={{ background: '#181818' }}
+        >
           <img
             src={getImageUrl(product.images?.[0]?.url)}
             alt={product.name}
             className="w-full h-full object-cover"
-            onError={(e) => { e.target.src = 'https://placehold.co/400x500/f3f4f6/9ca3af?text=VELOQ'; }}
+            onError={(e) => {
+              e.target.src = 'https://placehold.co/400x500/111111/333333?text=VELOQ';
+            }}
           />
 
           {/* Badges top-left */}
           <div className="absolute top-2 left-2 flex flex-col gap-1">
             {discount > 0 && (
-              <span className="text-[10px] font-black px-2 py-0.5 bg-red-500 text-white rounded-md leading-tight shadow-sm">
+              <span
+                className="text-[10px] font-black px-2 py-0.5 rounded-md leading-tight shadow-sm"
+                style={{ background: '#C8FF00', color: '#0A0A0A' }}
+              >
                 {discount}% OFF
               </span>
             )}
             {product.isNewArrival && !discount && (
-              <span className="text-[10px] font-black px-2 py-0.5 bg-gray-900 text-white rounded-md leading-tight">
+              <span
+                className="text-[10px] font-black px-2 py-0.5 rounded-md leading-tight"
+                style={{ background: '#FF3366', color: '#fff' }}
+              >
                 NEW
               </span>
             )}
             {product.isBestSeller && (
-              <span className="text-[10px] font-black px-2 py-0.5 bg-amber-400 text-black rounded-md leading-tight">
+              <span
+                className="text-[10px] font-black px-2 py-0.5 rounded-md leading-tight"
+                style={{ background: '#FF3366', color: '#fff' }}
+              >
                 BESTSELLER
               </span>
             )}
             {lowStock && !discount && (
-              <span className="text-[10px] font-black px-2 py-0.5 bg-orange-500 text-white rounded-md leading-tight">
+              <span
+                className="text-[10px] font-black px-2 py-0.5 rounded-md leading-tight"
+                style={{ background: '#FF6600', color: '#fff' }}
+              >
                 LOW STOCK
               </span>
             )}
           </div>
 
-          {/* Wishlist heart — always visible top-right */}
+          {/* Wishlist heart */}
           <button
             onClick={handleWishlist}
             className={clsx(
-              'absolute top-2 right-2 w-7 h-7 rounded-full flex items-center justify-center transition-all duration-200 shadow-sm',
-              inWishlist
-                ? 'bg-red-500 text-white'
-                : 'bg-white/95 text-gray-400 hover:text-red-500 hover:bg-white'
+              'absolute top-2 right-2 w-7 h-7 rounded-full flex items-center justify-center transition-all duration-200 shadow-sm'
             )}
+            style={{
+              background: inWishlist ? '#FF3366' : 'rgba(17,17,17,0.9)',
+              color: inWishlist ? '#fff' : '#777',
+              border: '1px solid ' + (inWishlist ? '#FF3366' : '#333'),
+            }}
           >
             <FiHeart className={clsx('text-xs', inWishlist && 'fill-current')} />
           </button>
@@ -95,43 +159,60 @@ export default function ProductCard({ product, index = 0 }) {
 
         {/* Info block */}
         <div className="px-2.5 pt-2 pb-0">
-          <p className="text-[10px] text-gray-400 uppercase tracking-widest font-medium truncate">
+          <p
+            className="text-[10px] uppercase tracking-widest font-medium truncate"
+            style={{ color: '#555' }}
+          >
             {product.brand || 'VELOQ'}
           </p>
-          <h3 className="text-[13px] font-semibold text-ink truncate leading-snug mt-0.5">
+          <h3
+            className="text-[13px] font-semibold truncate leading-snug mt-0.5"
+            style={{ color: '#FFFFFF', fontFamily: "'Plus Jakarta Sans', sans-serif" }}
+          >
             {product.name}
           </h3>
 
-          {/* Rating */}
+          {/* Rating — lime stars */}
           {product.avgRating > 0 && (
             <div className="flex items-center gap-1 mt-0.5">
               <div className="flex">
                 {[1, 2, 3, 4, 5].map((s) => (
                   <FiStar
                     key={s}
-                    className={clsx(
-                      'text-[9px]',
-                      s <= Math.round(product.avgRating)
-                        ? 'text-amber-400 fill-current'
-                        : 'text-gray-200'
-                    )}
+                    className="text-[9px]"
+                    style={{
+                      color: s <= Math.round(product.avgRating) ? '#C8FF00' : '#333',
+                      fill: s <= Math.round(product.avgRating) ? '#C8FF00' : 'none',
+                    }}
                   />
                 ))}
               </div>
-              <span className="text-[10px] text-gray-400">({product.numReviews})</span>
+              <span className="text-[10px]" style={{ color: '#555' }}>
+                ({product.numReviews})
+              </span>
             </div>
           )}
 
           {/* Price row */}
           <div className="mt-1">
             <div className="flex items-center gap-1.5 flex-wrap">
-              <span className="text-sm font-bold text-gray-900">{formatPrice(product.price)}</span>
+              <span className="text-sm font-bold text-white">
+                {formatPrice(product.price)}
+              </span>
               {product.comparePrice > product.price && (
-                <span className="text-[11px] text-gray-400 line-through">{formatPrice(product.comparePrice)}</span>
+                <span
+                  className="text-[11px] line-through"
+                  style={{ color: '#555' }}
+                >
+                  {formatPrice(product.comparePrice)}
+                </span>
               )}
             </div>
             {product.comparePrice > product.price && (
-              <p className="text-[10px] font-bold text-green-600 mt-0.5">
+              <p
+                className="text-[10px] font-bold mt-0.5"
+                style={{ color: '#C8FF00' }}
+              >
                 Save {formatPrice(product.comparePrice - product.price)}
               </p>
             )}
@@ -143,7 +224,8 @@ export default function ProductCard({ product, index = 0 }) {
               {sizes.map((size) => (
                 <span
                   key={size}
-                  className="text-[9px] text-gray-500 border border-gray-200 px-1.5 py-0.5 rounded-sm leading-tight"
+                  className="text-[9px] px-1.5 py-0.5 rounded-sm leading-tight"
+                  style={{ border: '1px solid #333', color: '#555' }}
                 >
                   {size.replace('UK ', '')}
                 </span>
@@ -152,16 +234,26 @@ export default function ProductCard({ product, index = 0 }) {
           )}
         </div>
 
-        {/* Add to Cart — full-width flush bottom, no top radius */}
+        {/* Add to Cart — lime full-width button */}
         <button
           onClick={handleAdd}
-          style={{ borderRadius: '0 0 12px 12px' }}
-          className={clsx(
-            'w-full mt-2.5 h-9 text-[11px] font-bold uppercase tracking-wider flex items-center justify-center gap-1.5 transition-all duration-200',
-            added
-              ? 'bg-green-600 text-white'
-              : 'bg-ink text-white hover:bg-gray-800'
-          )}
+          style={{
+            borderRadius: '0 0 12px 12px',
+            background: added ? '#00D4FF' : '#C8FF00',
+            color: '#0A0A0A',
+            transition: 'all 0.2s',
+          }}
+          className="w-full mt-2.5 h-9 text-[11px] font-black uppercase tracking-wider flex items-center justify-center gap-1.5"
+          onMouseEnter={e => {
+            if (!added) {
+              e.currentTarget.style.boxShadow = '0 0 20px rgba(200,255,0,0.4)';
+              e.currentTarget.style.transform = 'translateY(-1px)';
+            }
+          }}
+          onMouseLeave={e => {
+            e.currentTarget.style.boxShadow = 'none';
+            e.currentTarget.style.transform = 'none';
+          }}
         >
           {added ? (
             <><FiCheck className="text-xs" /> Added!</>

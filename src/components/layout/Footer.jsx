@@ -29,11 +29,20 @@ function AccordionSection({ title, children }) {
     <div>
       {/* Mobile: tappable header */}
       <button
-        className="md:hidden flex items-center justify-between w-full py-3.5 border-b border-gray-100"
+        className="md:hidden flex items-center justify-between w-full py-3.5"
+        style={{ borderBottom: '1px solid #222' }}
         onClick={() => setOpen(!open)}
       >
-        <span className="text-ink text-[11px] tracking-[0.25em] uppercase font-bold">{title}</span>
-        <FiChevronDown className={`text-mid text-sm transition-transform duration-200 flex-shrink-0 ${open ? 'rotate-180' : ''}`} />
+        <span
+          className="text-[11px] tracking-[0.25em] uppercase font-bold"
+          style={{ color: '#C8FF00' }}
+        >
+          {title}
+        </span>
+        <FiChevronDown
+          className={`text-sm transition-transform duration-200 flex-shrink-0 ${open ? 'rotate-180' : ''}`}
+          style={{ color: '#777' }}
+        />
       </button>
 
       {/* Mobile: collapsible content */}
@@ -54,7 +63,12 @@ function AccordionSection({ title, children }) {
 
       {/* Desktop: always visible */}
       <div className="hidden md:block">
-        <p className="text-ink text-[10px] tracking-[0.3em] uppercase font-bold mb-4">{title}</p>
+        <p
+          className="text-[10px] tracking-[0.3em] uppercase font-bold mb-4"
+          style={{ color: '#C8FF00' }}
+        >
+          {title}
+        </p>
         {children}
       </div>
     </div>
@@ -63,25 +77,45 @@ function AccordionSection({ title, children }) {
 
 export default function Footer() {
   return (
-    <footer className="bg-white border-t border-gray-200">
+    <footer style={{ background: '#0A0A0A', borderTop: '1px solid #222' }}>
       <div className="max-w-7xl mx-auto px-6 pt-10 pb-6">
 
         <div className="grid grid-cols-1 md:grid-cols-4 gap-0 md:gap-10 mb-6 md:mb-10">
 
           {/* Brand */}
-          <div className="md:col-span-1 py-5 md:py-0 border-b md:border-b-0 border-gray-100">
-            <Link to="/">
-              <span className="font-display text-4xl font-black tracking-[0.2em] text-ink">VELOQ</span>
+          <div
+            className="md:col-span-1 py-5 md:py-0"
+            style={{ borderBottom: '1px solid #222' }}
+          >
+            <Link to="/" className="inline-block group mb-3">
+              <span
+                className="font-display text-5xl tracking-[0.2em] text-white"
+                style={{ fontFamily: "'Bebas Neue', sans-serif" }}
+              >
+                VELO<span className="group-hover:text-[#C8FF00] transition-colors duration-200">Q</span>
+              </span>
             </Link>
-            <p className="text-mid text-sm mt-3 leading-relaxed max-w-xs">
+            <p className="text-sm leading-relaxed max-w-xs" style={{ color: '#777' }}>
               Premium men's footwear. Every pair tells a story.
             </p>
             <div className="flex gap-3 mt-5">
               {[FiInstagram, FiTwitter, FiYoutube].map((Icon, i) => (
                 <motion.a
-                  key={i} href="#"
+                  key={i}
+                  href="#"
                   whileHover={{ scale: 1.1 }}
-                  className="w-9 h-9 border border-gray-200 rounded-full flex items-center justify-center text-mid hover:text-ink hover:border-gray-400 transition-colors"
+                  className="w-9 h-9 rounded-full flex items-center justify-center transition-all duration-200"
+                  style={{ border: '1px solid #333', color: '#777' }}
+                  onMouseEnter={e => {
+                    e.currentTarget.style.borderColor = '#C8FF00';
+                    e.currentTarget.style.color = '#C8FF00';
+                    e.currentTarget.style.boxShadow = '0 0 12px rgba(200,255,0,0.3)';
+                  }}
+                  onMouseLeave={e => {
+                    e.currentTarget.style.borderColor = '#333';
+                    e.currentTarget.style.color = '#777';
+                    e.currentTarget.style.boxShadow = 'none';
+                  }}
                 >
                   <Icon className="text-sm" />
                 </motion.a>
@@ -94,7 +128,13 @@ export default function Footer() {
             <ul className="space-y-0.5 md:space-y-2.5">
               {SHOP_LINKS.map((link) => (
                 <li key={link.label}>
-                  <Link to={link.href} className="text-mid text-sm hover:text-ink transition-colors py-1.5 md:py-0 block">
+                  <Link
+                    to={link.href}
+                    className="text-sm py-1.5 md:py-0 block transition-colors duration-200"
+                    style={{ color: '#777' }}
+                    onMouseEnter={e => { e.currentTarget.style.color = '#C8FF00'; }}
+                    onMouseLeave={e => { e.currentTarget.style.color = '#777'; }}
+                  >
                     {link.label}
                   </Link>
                 </li>
@@ -107,7 +147,13 @@ export default function Footer() {
             <ul className="space-y-0.5 md:space-y-2.5">
               {HELP_LINKS.map((link) => (
                 <li key={link.label}>
-                  <Link to={link.href} className="text-mid text-sm hover:text-ink transition-colors py-1.5 md:py-0 block">
+                  <Link
+                    to={link.href}
+                    className="text-sm py-1.5 md:py-0 block transition-colors duration-200"
+                    style={{ color: '#777' }}
+                    onMouseEnter={e => { e.currentTarget.style.color = '#C8FF00'; }}
+                    onMouseLeave={e => { e.currentTarget.style.color = '#777'; }}
+                  >
                     {link.label}
                   </Link>
                 </li>
@@ -119,24 +165,55 @@ export default function Footer() {
           <AccordionSection title="Secure Payments">
             <div className="flex flex-wrap gap-2 mb-4">
               {PAYMENTS.map((p) => (
-                <span key={p} className="border border-gray-200 text-mid text-[10px] px-2.5 py-1 rounded font-medium">{p}</span>
+                <span
+                  key={p}
+                  className="text-[10px] px-2.5 py-1 rounded font-medium"
+                  style={{ border: '1px solid #333', color: '#777' }}
+                >
+                  {p}
+                </span>
               ))}
             </div>
-            <p className="text-ink text-[10px] tracking-widest uppercase font-bold mb-2 md:mb-3">Delivery By</p>
+            <p
+              className="text-[10px] tracking-widest uppercase font-bold mb-2 md:mb-3"
+              style={{ color: '#C8FF00' }}
+            >
+              Delivery By
+            </p>
             <div className="flex gap-2 flex-wrap">
               {COURIERS.map((c) => (
-                <span key={c} className="border border-gray-200 text-mid text-[10px] px-2.5 py-1 rounded">{c}</span>
+                <span
+                  key={c}
+                  className="text-[10px] px-2.5 py-1 rounded"
+                  style={{ border: '1px solid #333', color: '#777' }}
+                >
+                  {c}
+                </span>
               ))}
             </div>
           </AccordionSection>
         </div>
 
         {/* Bottom bar */}
-        <div className="border-t border-gray-100 pt-5 flex flex-col md:flex-row items-center justify-between gap-3">
-          <p className="text-mid text-xs">© {new Date().getFullYear()} VELOQ. All rights reserved.</p>
+        <div
+          className="pt-5 flex flex-col md:flex-row items-center justify-between gap-3"
+          style={{ borderTop: '1px solid #222' }}
+        >
+          <p className="text-xs" style={{ color: '#555' }}>
+            © {new Date().getFullYear()} VELOQ. All rights reserved.
+          </p>
           <div className="flex gap-5">
             {['Privacy Policy', 'Terms of Service', 'Cookie Policy'].map((t) => (
-              <a key={t} href="#" className="text-mid hover:text-ink text-xs transition-colors">{t}</a>
+              <a
+                key={t}
+                href="#"
+                className="text-xs transition-colors duration-200"
+                style={{ color: '#555' }}
+                onMouseEnter={e => { e.currentTarget.style.color = '#C8FF00'; }}
+                onMouseLeave={e => { e.currentTarget.style.color = '#555'; }}
+              >
+                {t}
+              </a>
             ))}
           </div>
         </div>

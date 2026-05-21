@@ -12,13 +12,15 @@ import { getImageUrl } from '../utils/helpers';
 
 /* ── Scroll reveal ──────────────────────────────────────────────── */
 function Reveal({ children, className = '', delay = 0 }) {
-  const ref = useRef(null);
-  const inView = useInView(ref, { once: true, margin: '-30px' });
   return (
-    <motion.div ref={ref} className={className}
-      initial={{ opacity: 0, y: 24 }}
-      animate={inView ? { opacity: 1, y: 0 } : {}}
-      transition={{ duration: 0.5, delay, ease: [0.22, 1, 0.36, 1] }}>
+    <motion.div
+      className={className}
+      initial={{ opacity: 0, y: 40, rotateX: 15 }}
+      whileInView={{ opacity: 1, y: 0, rotateX: 0 }}
+      viewport={{ once: true, margin: '-30px' }}
+      transition={{ duration: 0.6, delay, ease: [0.22, 1, 0.36, 1] }}
+      style={{ transformStyle: 'preserve-3d' }}
+    >
       {children}
     </motion.div>
   );
@@ -31,80 +33,256 @@ function Counter({ from = 0, to, suffix = '' }) {
   const inView = useInView(ref, { once: true });
   useEffect(() => {
     if (!inView) return;
-    const c = animate(from, to, { duration: 2, ease: [0.22, 1, 0.36, 1], onUpdate: v => setVal(Math.round(v * 10) / 10) });
+    const c = animate(from, to, {
+      duration: 2,
+      ease: [0.22, 1, 0.36, 1],
+      onUpdate: (v) => setVal(Math.round(v * 10) / 10),
+    });
     return c.stop;
-  }, [inView, to]);
+  }, [inView, to, from]);
   return <span ref={ref}>{val}{suffix}</span>;
 }
 
 /* ── Placeholder banners ────────────────────────────────────────── */
 const PH = [
-  { position: 1, title: "New Season Drop", subtitle: "Men's Footwear 2025", buttonText: 'Shop Now', buttonLink: '/products', bgColor: '#0f172a', textDark: false },
-  { position: 2, title: 'Sneakers',         subtitle: 'Street-ready kicks',  buttonText: 'Shop Now', buttonLink: '/collections/sneakers',       bgColor: '#172554', textDark: false },
-  { position: 3, title: 'Casual Shoes',     subtitle: 'Everyday comfort',    buttonText: 'Shop Now', buttonLink: '/collections/casual-shoes',    bgColor: '#431407', textDark: false },
-  { position: 4, title: 'Slippers & Clogs', subtitle: 'Easy all-day style',  buttonText: 'Shop Now', buttonLink: '/collections/slippers-clogs',  bgColor: '#052e16', textDark: false },
+  { position: 1, title: 'New Season Drop', subtitle: "Men's Footwear 2025", buttonText: 'Shop Now', buttonLink: '/products', bgColor: '#0A0A0A', textDark: false },
+  { position: 2, title: 'Sneakers',         subtitle: 'Street-ready kicks',  buttonText: 'Shop Now', buttonLink: '/collections/sneakers',       bgColor: '#0D0D0D', textDark: false },
+  { position: 3, title: 'Casual Shoes',     subtitle: 'Everyday comfort',    buttonText: 'Shop Now', buttonLink: '/collections/casual-shoes',    bgColor: '#0D0D0D', textDark: false },
+  { position: 4, title: 'Slippers & Clogs', subtitle: 'Easy all-day style',  buttonText: 'Shop Now', buttonLink: '/collections/slippers-clogs',  bgColor: '#0D0D0D', textDark: false },
 ];
 
-/* ── Hero slider ────────────────────────────────────────────────── */
+/* ── Hero banner ────────────────────────────────────────────────── */
 function HeroBanner({ banners }) {
   const [cur, setCur] = useState(0);
-  const slides = (banners?.filter(b => b.position === 1)?.length ? banners.filter(b => b.position === 1) : [PH[0]]);
+  const slides = banners?.filter((b) => b.position === 1)?.length
+    ? banners.filter((b) => b.position === 1)
+    : [PH[0]];
+
   useEffect(() => {
     if (slides.length <= 1) return;
-    const t = setInterval(() => setCur(p => (p + 1) % slides.length), 4800);
+    const t = setInterval(() => setCur((p) => (p + 1) % slides.length), 4000);
     return () => clearInterval(t);
   }, [slides.length]);
+
   const s = slides[cur];
+
   return (
-    <div className="relative w-full overflow-hidden" style={{ background: s.bgColor || '#0f172a', aspectRatio: '16/7', minHeight: 260, maxHeight: 520 }}>
+    <div
+      className="relative w-full overflow-hidden flex items-center"
+      style={{
+        minHeight: '100vh',
+        background: s.bgColor || '#0A0A0A',
+      }}
+    >
+      {/* Full-bleed background */}
       <AnimatePresence mode="wait">
-        <motion.div key={cur} initial={{ opacity: 0, scale: 1.04 }} animate={{ opacity: 1, scale: 1 }}
-          exit={{ opacity: 0 }} transition={{ duration: 0.7 }} className="absolute inset-0">
-          {s.image && <img src={s.image} alt={s.title} className="w-full h-full object-cover" />}
-          <div className="absolute inset-0 bg-gradient-to-r from-black/75 via-black/40 to-transparent" />
+        <motion.div
+          key={cur}
+          initial={{ opacity: 0, scale: 1.04 }}
+          animate={{ opacity: 1, scale: 1 }}
+          exit={{ opacity: 0 }}
+          transition={{ duration: 0.8 }}
+          className="absolute inset-0"
+        >
+          {s.image ? (
+            <img
+              src={getImageUrl(s.image)}
+              alt={s.title}
+              className="w-full h-full object-cover"
+            />
+          ) : (
+            <div
+              className="w-full h-full"
+              style={{
+                background: 'linear-gradient(135deg, #0A0A0A 0%, #111111 50%, #0A0A0A 100%)',
+              }}
+            />
+          )}
+          <div
+            className="absolute inset-0"
+            style={{
+              background: 'linear-gradient(to right, rgba(10,10,10,0.92) 0%, rgba(10,10,10,0.6) 50%, rgba(10,10,10,0.2) 100%)',
+            }}
+          />
         </motion.div>
       </AnimatePresence>
-      <div className="relative z-10 h-full flex items-center px-5 sm:px-10 md:px-16">
-        <div className="max-w-lg">
-          <motion.span key={`sub-${cur}`} initial={{ opacity: 0, y: 8 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: 0.1 }}
-            className="inline-block text-[10px] sm:text-xs font-bold tracking-[0.25em] uppercase text-white/60 mb-2 sm:mb-3">
+
+      {/* Scan line effect */}
+      <div
+        className="absolute inset-0 pointer-events-none overflow-hidden"
+        style={{ opacity: 0.03 }}
+      >
+        <div
+          style={{
+            position: 'absolute',
+            width: '100%',
+            height: '2px',
+            background: '#C8FF00',
+            animation: 'scan-line 4s linear infinite',
+          }}
+        />
+      </div>
+
+      {/* Content */}
+      <div className="relative z-10 w-full px-5 sm:px-10 md:px-16 lg:px-24">
+        <div className="max-w-5xl">
+
+          {/* Subtitle */}
+          <motion.span
+            key={`sub-${cur}`}
+            initial={{ opacity: 0, y: 8 }}
+            animate={{ opacity: 1, y: 0 }}
+            transition={{ delay: 0.1 }}
+            className="inline-block text-[11px] sm:text-xs font-bold tracking-[0.35em] uppercase mb-3"
+            style={{ color: '#C8FF00' }}
+          >
             {s.subtitle}
           </motion.span>
-          <motion.h1 key={`title-${cur}`} initial={{ opacity: 0, y: 18 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: 0.18 }}
-            className="font-display text-3xl sm:text-5xl md:text-6xl lg:text-7xl font-black tracking-tight leading-none text-white mb-4 sm:mb-6">
+
+          {/* Giant display title */}
+          <motion.h1
+            key={`title-${cur}`}
+            initial={{ opacity: 0, y: 30 }}
+            animate={{ opacity: 1, y: 0 }}
+            transition={{ delay: 0.15 }}
+            className="text-[clamp(64px,14vw,200px)] leading-none font-black text-white"
+            style={{
+              fontFamily: "'Bebas Neue', sans-serif",
+              letterSpacing: '0.02em',
+              lineHeight: 0.9,
+            }}
+          >
             {s.title}
           </motion.h1>
-          <motion.div key={`btns-${cur}`} initial={{ opacity: 0, y: 10 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: 0.28 }}
-            className="flex gap-3 flex-wrap">
-            <Link to={s.buttonLink || '/products'}
-              className="inline-flex items-center gap-2 bg-white text-gray-900 px-5 sm:px-7 py-2.5 sm:py-3 text-xs sm:text-sm font-bold rounded-full hover:bg-gray-100 transition-all shadow-lg">
-              {s.buttonText || 'Shop Now'} <FiArrowRight className="text-xs" />
+
+          {/* Lime underline accent */}
+          <motion.div
+            key={`line-${cur}`}
+            initial={{ width: 0 }}
+            animate={{ width: '120px' }}
+            transition={{ delay: 0.3, duration: 0.5 }}
+            className="h-1 mt-4 mb-6 rounded-full"
+            style={{ background: '#C8FF00', boxShadow: '0 0 12px rgba(200,255,0,0.6)' }}
+          />
+
+          {/* CTA Buttons */}
+          <motion.div
+            key={`btns-${cur}`}
+            initial={{ opacity: 0, y: 10 }}
+            animate={{ opacity: 1, y: 0 }}
+            transition={{ delay: 0.3 }}
+            className="flex gap-3 flex-wrap"
+          >
+            <Link
+              to={s.buttonLink || '/products'}
+              className="inline-flex items-center gap-2 px-7 py-3.5 rounded-xl text-sm font-black uppercase tracking-wider transition-all duration-200"
+              style={{ background: '#C8FF00', color: '#0A0A0A' }}
+              onMouseEnter={e => {
+                e.currentTarget.style.boxShadow = '0 0 24px rgba(200,255,0,0.5)';
+                e.currentTarget.style.transform = 'translateY(-2px)';
+              }}
+              onMouseLeave={e => {
+                e.currentTarget.style.boxShadow = 'none';
+                e.currentTarget.style.transform = 'none';
+              }}
+            >
+              {s.buttonText || 'Shop Now'} <FiArrowRight className="text-sm" />
             </Link>
-            <Link to="/products"
-              className="inline-flex items-center gap-2 border border-white/40 text-white px-5 sm:px-7 py-2.5 sm:py-3 text-xs sm:text-sm font-semibold rounded-full hover:border-white/70 hover:bg-white/10 transition-all">
+            <Link
+              to="/products"
+              className="inline-flex items-center gap-2 px-7 py-3.5 rounded-xl text-sm font-bold uppercase tracking-wider transition-all duration-200"
+              style={{ border: '1px solid rgba(255,255,255,0.3)', color: '#fff' }}
+              onMouseEnter={e => {
+                e.currentTarget.style.borderColor = 'rgba(255,255,255,0.7)';
+                e.currentTarget.style.background = 'rgba(255,255,255,0.08)';
+              }}
+              onMouseLeave={e => {
+                e.currentTarget.style.borderColor = 'rgba(255,255,255,0.3)';
+                e.currentTarget.style.background = 'transparent';
+              }}
+            >
               View All
             </Link>
           </motion.div>
         </div>
       </div>
+
+      {/* Slide nav arrows */}
       {slides.length > 1 && (
         <>
-          <button onClick={() => setCur(p => (p - 1 + slides.length) % slides.length)}
-            className="absolute left-3 top-1/2 -translate-y-1/2 w-8 h-8 sm:w-10 sm:h-10 bg-white/15 backdrop-blur-sm hover:bg-white/30 text-white rounded-full flex items-center justify-center z-20 transition-all">
-            <FiChevronLeft className="text-sm sm:text-base" />
+          <button
+            onClick={() => setCur((p) => (p - 1 + slides.length) % slides.length)}
+            className="absolute left-4 top-1/2 -translate-y-1/2 w-10 h-10 rounded-full flex items-center justify-center z-20 transition-all"
+            style={{
+              background: 'rgba(17,17,17,0.6)',
+              border: '1px solid #333',
+              color: '#fff',
+              backdropFilter: 'blur(8px)',
+            }}
+            onMouseEnter={e => {
+              e.currentTarget.style.borderColor = '#C8FF00';
+              e.currentTarget.style.color = '#C8FF00';
+            }}
+            onMouseLeave={e => {
+              e.currentTarget.style.borderColor = '#333';
+              e.currentTarget.style.color = '#fff';
+            }}
+          >
+            <FiChevronLeft />
           </button>
-          <button onClick={() => setCur(p => (p + 1) % slides.length)}
-            className="absolute right-3 top-1/2 -translate-y-1/2 w-8 h-8 sm:w-10 sm:h-10 bg-white/15 backdrop-blur-sm hover:bg-white/30 text-white rounded-full flex items-center justify-center z-20 transition-all">
-            <FiChevronRight className="text-sm sm:text-base" />
+          <button
+            onClick={() => setCur((p) => (p + 1) % slides.length)}
+            className="absolute right-4 top-1/2 -translate-y-1/2 w-10 h-10 rounded-full flex items-center justify-center z-20 transition-all"
+            style={{
+              background: 'rgba(17,17,17,0.6)',
+              border: '1px solid #333',
+              color: '#fff',
+              backdropFilter: 'blur(8px)',
+            }}
+            onMouseEnter={e => {
+              e.currentTarget.style.borderColor = '#C8FF00';
+              e.currentTarget.style.color = '#C8FF00';
+            }}
+            onMouseLeave={e => {
+              e.currentTarget.style.borderColor = '#333';
+              e.currentTarget.style.color = '#fff';
+            }}
+          >
+            <FiChevronRight />
           </button>
-          <div className="absolute bottom-3 left-1/2 -translate-x-1/2 flex gap-1.5 z-20">
+
+          {/* Dot navigation */}
+          <div className="absolute bottom-8 left-1/2 -translate-x-1/2 flex gap-2 z-20">
             {slides.map((_, i) => (
-              <button key={i} onClick={() => setCur(i)}
-                className={`h-1 rounded-full transition-all duration-300 ${i === cur ? 'w-8 bg-white' : 'w-2 bg-white/35'}`} />
+              <button
+                key={i}
+                onClick={() => setCur(i)}
+                className="rounded-full transition-all duration-300"
+                style={{
+                  width: i === cur ? '32px' : '8px',
+                  height: '8px',
+                  background: i === cur ? '#C8FF00' : '#333',
+                  boxShadow: i === cur ? '0 0 8px rgba(200,255,0,0.5)' : 'none',
+                }}
+              />
             ))}
           </div>
         </>
       )}
+
+      {/* Scroll indicator */}
+      <div
+        className="absolute bottom-8 right-8 flex flex-col items-center gap-1 z-20"
+        style={{ color: '#555' }}
+      >
+        <span className="text-[9px] tracking-[0.3em] uppercase">Scroll</span>
+        <motion.div
+          animate={{ y: [0, 6, 0] }}
+          transition={{ repeat: Infinity, duration: 1.5 }}
+          className="w-px h-8"
+          style={{ background: 'linear-gradient(to bottom, #555, transparent)' }}
+        />
+      </div>
     </div>
   );
 }
@@ -112,15 +290,28 @@ function HeroBanner({ banners }) {
 /* ── USP strip ──────────────────────────────────────────────────── */
 function UspStrip({ featureBar }) {
   return (
-    <div className="bg-white border-b border-gray-100">
+    <div style={{ background: '#111111', borderTop: '1px solid #222', borderBottom: '1px solid #222' }}>
       <div className="max-w-7xl mx-auto px-4">
-        <div className="grid grid-cols-2 md:grid-cols-4 divide-x divide-gray-100">
+        <div className="grid grid-cols-2 md:grid-cols-4" style={{ borderRight: 'none' }}>
           {featureBar.map((item, i) => (
-            <div key={i} className="flex items-center gap-2.5 py-3 px-4">
-              <span className="text-xl flex-shrink-0">{item.icon}</span>
+            <div
+              key={i}
+              className="flex items-center gap-3 py-4 px-5"
+              style={{ borderRight: i < featureBar.length - 1 ? '1px solid #222' : 'none' }}
+            >
+              {/* Icon: URL image or text/emoji */}
+              <span className="flex-shrink-0 w-8 h-8 flex items-center justify-center">
+                {typeof item.icon === 'string' && item.icon.startsWith('http') ? (
+                  <img src={item.icon} alt="" className="w-7 h-7 object-contain" />
+                ) : (
+                  <span className="text-xl" style={{ color: '#C8FF00' }}>
+                    {item.icon}
+                  </span>
+                )}
+              </span>
               <div>
-                <p className="text-[11px] sm:text-xs font-bold text-gray-900 leading-tight">{item.title}</p>
-                <p className="text-[10px] text-gray-500 leading-tight">{item.subtitle}</p>
+                <p className="text-[11px] sm:text-xs font-bold leading-tight text-white">{item.title}</p>
+                <p className="text-[10px] leading-tight" style={{ color: '#555' }}>{item.subtitle}</p>
               </div>
             </div>
           ))}
@@ -135,23 +326,37 @@ function DualMarquee({ items }) {
   const row1 = [...items, ...items];
   const row2 = [...items.slice().reverse(), ...items.slice().reverse()];
   return (
-    <div className="bg-gray-900 overflow-hidden select-none">
-      {/* Row 1 — left */}
-      <div className="py-2.5 border-b border-white/10 overflow-hidden">
+    <div className="overflow-hidden select-none" style={{ background: '#0A0A0A' }}>
+      {/* Row 1 — left — white text, lime separators */}
+      <div
+        className="py-3 overflow-hidden"
+        style={{ borderBottom: '1px solid #1a1a1a' }}
+      >
         <div className="marquee-track">
           {row1.map((item, i) => (
-            <span key={i} className="inline-flex items-center gap-3 px-5 text-white/60 text-[10px] sm:text-[11px] font-bold tracking-[0.3em] uppercase">
-              <span className="text-amber-400 text-xs">✦</span>{item}
+            <span
+              key={i}
+              className="inline-flex items-center gap-3 px-6 text-[11px] font-bold tracking-[0.3em] uppercase"
+              style={{ color: '#FFFFFF' }}
+            >
+              <span style={{ color: '#C8FF00', fontSize: '10px' }}>✦</span>
+              {item}
             </span>
           ))}
         </div>
       </div>
-      {/* Row 2 — right */}
-      <div className="py-2.5 overflow-hidden">
+
+      {/* Row 2 — right — lime text, white separators */}
+      <div className="py-3 overflow-hidden">
         <div className="marquee-track-reverse">
           {row2.map((item, i) => (
-            <span key={i} className="inline-flex items-center gap-3 px-5 text-white/40 text-[10px] sm:text-[11px] font-bold tracking-[0.3em] uppercase">
-              <span className="text-white/20 text-xs">◆</span>{item}
+            <span
+              key={i}
+              className="inline-flex items-center gap-3 px-6 text-[11px] font-bold tracking-[0.3em] uppercase"
+              style={{ color: '#C8FF00' }}
+            >
+              <span style={{ color: 'rgba(255,255,255,0.3)', fontSize: '10px' }}>◆</span>
+              {item}
             </span>
           ))}
         </div>
@@ -163,14 +368,38 @@ function DualMarquee({ items }) {
 /* ── Section title ──────────────────────────────────────────────── */
 function SectionTitle({ title, sub, href, label = 'View All' }) {
   return (
-    <div className="flex items-end justify-between mb-4 sm:mb-5">
+    <div className="flex items-end justify-between mb-5 sm:mb-6">
       <div>
-        {sub && <p className="text-[10px] text-gray-400 uppercase tracking-[0.2em] font-bold mb-0.5">{sub}</p>}
-        <h2 className="text-lg sm:text-2xl font-bold text-gray-900">{title}</h2>
+        {sub && (
+          <p
+            className="text-[10px] uppercase tracking-[0.3em] font-bold mb-1"
+            style={{ color: '#C8FF00' }}
+          >
+            {sub}
+          </p>
+        )}
+        <h2
+          className="text-3xl sm:text-5xl font-black leading-none"
+          style={{ fontFamily: "'Bebas Neue', sans-serif", color: '#FFFFFF', letterSpacing: '0.02em' }}
+        >
+          {title}
+        </h2>
+        <div className="h-0.5 mt-2 w-16" style={{ background: '#C8FF00', boxShadow: '0 0 8px rgba(200,255,0,0.5)' }} />
       </div>
       {href && (
-        <Link to={href}
-          className="flex-shrink-0 flex items-center gap-1.5 text-[11px] sm:text-xs font-bold text-gray-900 border border-gray-300 px-3 sm:px-4 py-1.5 sm:py-2 rounded-full hover:bg-gray-900 hover:text-white hover:border-gray-900 transition-all">
+        <Link
+          to={href}
+          className="flex-shrink-0 flex items-center gap-1.5 text-[11px] sm:text-xs font-bold px-4 py-2 rounded-full transition-all duration-200"
+          style={{ border: '1px solid #C8FF00', color: '#C8FF00' }}
+          onMouseEnter={e => {
+            e.currentTarget.style.background = '#C8FF00';
+            e.currentTarget.style.color = '#0A0A0A';
+          }}
+          onMouseLeave={e => {
+            e.currentTarget.style.background = 'transparent';
+            e.currentTarget.style.color = '#C8FF00';
+          }}
+        >
           {label} <FiArrowRight className="text-[10px]" />
         </Link>
       )}
@@ -178,16 +407,22 @@ function SectionTitle({ title, sub, href, label = 'View All' }) {
   );
 }
 
-/* ── Skeleton card ──────────────────────────────────────────────── */
+/* ── Skeleton card (dark) ───────────────────────────────────────── */
 function Skel() {
   return (
-    <div className="bg-white rounded-2xl overflow-hidden border border-gray-100 animate-pulse">
-      <div className="aspect-[4/5] bg-gradient-to-br from-gray-100 to-gray-200" />
+    <div
+      className="rounded-xl overflow-hidden animate-pulse"
+      style={{ background: '#111', border: '1px solid #222' }}
+    >
+      <div
+        className="aspect-[4/5]"
+        style={{ background: 'linear-gradient(135deg, #181818, #222)' }}
+      />
       <div className="p-3 space-y-2">
-        <div className="h-2 bg-gray-100 rounded w-1/3" />
-        <div className="h-3 bg-gray-100 rounded w-3/4" />
-        <div className="h-3 bg-gray-100 rounded w-1/2" />
-        <div className="h-8 bg-gray-100 rounded-xl mt-3" />
+        <div className="h-2 rounded w-1/3" style={{ background: '#222' }} />
+        <div className="h-3 rounded w-3/4" style={{ background: '#222' }} />
+        <div className="h-3 rounded w-1/2" style={{ background: '#222' }} />
+        <div className="h-8 rounded-xl mt-3" style={{ background: '#222' }} />
       </div>
     </div>
   );
@@ -196,18 +431,41 @@ function Skel() {
 /* ── Promo banner ───────────────────────────────────────────────── */
 function PromoBanner({ banner, className = '' }) {
   return (
-    <Link to={banner.buttonLink || '/products'}
+    <Link
+      to={banner.buttonLink || '/products'}
       className={`relative overflow-hidden rounded-2xl flex items-end group ${className}`}
-      style={{ backgroundColor: banner.bgColor || '#0f172a', minHeight: 200 }}>
+      style={{ backgroundColor: banner.bgColor || '#111', minHeight: 220 }}
+    >
       {banner.image && (
-        <img src={banner.image} alt={banner.title}
-          className="absolute inset-0 w-full h-full object-cover group-hover:scale-105 transition-transform duration-700" />
+        <img
+          src={getImageUrl(banner.image)}
+          alt={banner.title}
+          className="absolute inset-0 w-full h-full object-cover group-hover:scale-105 transition-transform duration-700"
+        />
       )}
-      <div className="absolute inset-0 bg-gradient-to-t from-black/80 via-black/30 to-black/5" />
+      <div
+        className="absolute inset-0"
+        style={{
+          background: 'linear-gradient(to top, rgba(10,10,10,0.9) 0%, rgba(10,10,10,0.4) 50%, rgba(10,10,10,0.1) 100%)',
+        }}
+      />
       <div className="relative z-10 p-5 sm:p-7 w-full">
-        <p className="text-[10px] text-white/50 font-bold uppercase tracking-[0.25em] mb-1">{banner.subtitle}</p>
-        <h3 className="font-display text-2xl sm:text-4xl font-black text-white tracking-tight leading-none mb-3">{banner.title}</h3>
-        <span className="inline-flex items-center gap-2 text-xs font-bold text-white border border-white/30 px-4 py-2 rounded-full group-hover:bg-white group-hover:text-gray-900 transition-all">
+        <p
+          className="text-[10px] font-bold uppercase tracking-[0.25em] mb-1"
+          style={{ color: '#C8FF00' }}
+        >
+          {banner.subtitle}
+        </p>
+        <h3
+          className="text-3xl sm:text-5xl font-black text-white leading-none mb-3"
+          style={{ fontFamily: "'Bebas Neue', sans-serif" }}
+        >
+          {banner.title}
+        </h3>
+        <span
+          className="inline-flex items-center gap-2 text-xs font-bold px-4 py-2 rounded-full transition-all duration-200 group-hover:bg-[#C8FF00] group-hover:text-[#0A0A0A]"
+          style={{ border: '1px solid rgba(200,255,0,0.5)', color: '#C8FF00' }}
+        >
           {banner.buttonText || 'Shop Now'} <FiArrowRight className="text-[10px]" />
         </span>
       </div>
@@ -215,13 +473,88 @@ function PromoBanner({ banner, className = '' }) {
   );
 }
 
-/* ── Reviews (30 realistic) ─────────────────────────────────────── */
+/* ── Category card with 3D tilt ─────────────────────────────────── */
+function CategoryCard({ cat }) {
+  const ref = useRef(null);
+
+  const handleMove = (e) => {
+    if (!ref.current) return;
+    const r = ref.current.getBoundingClientRect();
+    const x = ((e.clientX - r.left) / r.width - 0.5) * 14;
+    const y = ((e.clientY - r.top)  / r.height - 0.5) * -10;
+    ref.current.style.transform = `perspective(1200px) rotateX(${y}deg) rotateY(${x}deg) scale(1.02)`;
+  };
+
+  const handleLeave = () => {
+    if (ref.current) ref.current.style.transform = '';
+  };
+
+  return (
+    <Link
+      ref={ref}
+      to={cat.href}
+      className="relative overflow-hidden rounded-2xl flex flex-col justify-end group"
+      style={{
+        backgroundColor: '#111',
+        minHeight: 'clamp(180px, 22vw, 280px)',
+        border: '1px solid #222',
+        transition: 'transform 0.3s cubic-bezier(0.22,1,0.36,1), box-shadow 0.3s',
+      }}
+      onMouseMove={handleMove}
+      onMouseLeave={handleLeave}
+      onMouseEnter={e => {
+        e.currentTarget.style.boxShadow = '0 0 30px rgba(200,255,0,0.1)';
+        e.currentTarget.style.borderColor = '#333';
+      }}
+    >
+      {cat.image ? (
+        <img
+          src={getImageUrl(cat.image)}
+          alt={cat.label}
+          className="absolute inset-0 w-full h-full object-cover group-hover:scale-105 transition-transform duration-700"
+        />
+      ) : (
+        <div
+          className="absolute inset-0"
+          style={{
+            background: `linear-gradient(135deg, ${cat.bg || '#111'} 0%, #0A0A0A 100%)`,
+          }}
+        />
+      )}
+      <div
+        className="absolute inset-0"
+        style={{
+          background: 'linear-gradient(to top, rgba(10,10,10,0.88) 0%, rgba(10,10,10,0.3) 60%, transparent 100%)',
+        }}
+      />
+      <div className="relative z-10 p-4 sm:p-6">
+        <h3
+          className="font-black text-white text-2xl sm:text-3xl leading-none"
+          style={{ fontFamily: "'Bebas Neue', sans-serif" }}
+        >
+          {cat.label}
+        </h3>
+        <span
+          className="inline-flex items-center gap-1.5 mt-2 text-[11px] font-bold px-3 py-1.5 rounded-full transition-all duration-200"
+          style={{
+            border: '1px solid rgba(200,255,0,0.4)',
+            color: '#C8FF00',
+          }}
+        >
+          Shop Now <FiArrowRight className="text-[9px]" />
+        </span>
+      </div>
+    </Link>
+  );
+}
+
+/* ── Reviews (30 realistic Indian customers) ────────────────────── */
 const ALL_REVIEWS = [
   { name: 'Rahul M.',   city: 'Mumbai',    r: 5, text: 'Best quality shoes I have bought online. Super fast delivery!', product: 'Sneakers' },
   { name: 'Arjun S.',   city: 'Bangalore', r: 5, text: 'VELOQ never disappoints. Fit is perfect, material is premium!', product: 'Casual Shoes' },
   { name: 'Dev P.',     city: 'Delhi',     r: 5, text: "Ordered for my brother's birthday — he absolutely loves them!", product: 'Slippers' },
   { name: 'Karan T.',   city: 'Pune',      r: 5, text: 'Slippers are super comfortable. Worth every rupee. Highly recommended!', product: 'Slippers' },
-  { name: 'Amit R.',    city: 'Jaipur',    r: 5, text: 'Sneakers are fire 🔥 Quality is top notch, delivery was fast!', product: 'Sneakers' },
+  { name: 'Amit R.',    city: 'Jaipur',    r: 5, text: 'Sneakers are fire. Quality is top notch, delivery was fast!', product: 'Sneakers' },
   { name: 'Suresh K.',  city: 'Chennai',   r: 4, text: 'Good product, accurate sizing. Happy with the purchase overall.', product: 'Casual Shoes' },
   { name: 'Mohit V.',   city: 'Hyderabad', r: 5, text: 'Exactly as shown in pictures. Premium feel, great packaging!', product: 'Sneakers' },
   { name: 'Deepak L.',  city: 'Kolkata',   r: 5, text: 'Wore them to office first day — got so many compliments!', product: 'Casual Shoes' },
@@ -251,27 +584,51 @@ const ALL_REVIEWS = [
 
 function ReviewCard({ review }) {
   return (
-    <div className="flex-shrink-0 w-64 sm:w-72 bg-white rounded-2xl p-5 border border-gray-100 shadow-sm hover:shadow-md hover:border-gray-200 transition-all">
+    <div
+      className="flex-shrink-0 w-64 sm:w-72 p-5 rounded-2xl"
+      style={{ background: '#111', border: '1px solid #222' }}
+    >
       <div className="flex items-center gap-0.5 mb-3">
-        {[1,2,3,4,5].map(i => (
-          <FiStar key={i} className={`text-xs ${i <= review.r ? 'text-amber-400 fill-amber-400' : 'text-gray-200'}`} />
+        {[1, 2, 3, 4, 5].map((i) => (
+          <FiStar
+            key={i}
+            className="text-xs"
+            style={{
+              color: i <= review.r ? '#C8FF00' : '#333',
+              fill: i <= review.r ? '#C8FF00' : 'none',
+            }}
+          />
         ))}
-        <span className="ml-2 text-[10px] text-emerald-600 font-semibold flex items-center gap-0.5">
+        <span
+          className="ml-2 text-[10px] font-semibold flex items-center gap-0.5"
+          style={{ color: '#C8FF00' }}
+        >
           <FiCheck className="text-[9px]" /> Verified
         </span>
       </div>
-      <p className="text-xs sm:text-sm text-gray-700 leading-relaxed mb-4 line-clamp-3">"{review.text}"</p>
+      <p
+        className="text-xs sm:text-sm leading-relaxed mb-4 line-clamp-3"
+        style={{ color: '#aaa' }}
+      >
+        "{review.text}"
+      </p>
       <div className="flex items-center justify-between">
         <div className="flex items-center gap-2">
-          <div className="w-8 h-8 rounded-full bg-gray-900 text-white text-xs font-bold flex items-center justify-center flex-shrink-0">
+          <div
+            className="w-8 h-8 rounded-full text-xs font-bold flex items-center justify-center flex-shrink-0"
+            style={{ background: '#C8FF00', color: '#0A0A0A' }}
+          >
             {review.name[0]}
           </div>
           <div>
-            <p className="text-xs font-bold text-gray-900 leading-tight">{review.name}</p>
-            <p className="text-[10px] text-gray-400">{review.city}</p>
+            <p className="text-xs font-bold text-white leading-tight">{review.name}</p>
+            <p className="text-[10px]" style={{ color: '#555' }}>{review.city}</p>
           </div>
         </div>
-        <span className="text-[9px] font-semibold text-gray-400 bg-gray-50 border border-gray-100 px-2 py-1 rounded-full">
+        <span
+          className="text-[9px] font-semibold px-2 py-1 rounded-full"
+          style={{ background: '#181818', border: '1px solid #333', color: '#777' }}
+        >
           {review.product}
         </span>
       </div>
@@ -279,52 +636,55 @@ function ReviewCard({ review }) {
   );
 }
 
-/* ── Category fallback emoji map ────────────────────────────────── */
-const CAT_EMOJI = {
-  sneakers: '👟', 'casual-shoes': '🥿', 'slippers-clogs': '🩴',
-  'new-arrivals': '⭐', default: '👞',
-};
-const CAT_COLORS = {
-  sneakers: 'bg-blue-600', 'casual-shoes': 'bg-amber-500',
-  'slippers-clogs': 'bg-emerald-600', default: 'bg-gray-700',
-};
-
-/* ── DEFAULT theme data ─────────────────────────────────────────── */
-const DEFAULT_MARQUEE = ["Premium Men's Footwear", 'Free Delivery ₹999+', '100% Authentic', 'New Arrivals Weekly', 'Sneakers', 'Casual Shoes', 'Slippers & Clogs', 'Express Shipping', 'Easy Returns', 'Premium Quality'];
+/* ── DEFAULT data ───────────────────────────────────────────────── */
+const DEFAULT_MARQUEE = [
+  "Premium Men's Footwear", 'Free Delivery ₹999+', '100% Authentic',
+  'New Arrivals Weekly', 'Sneakers', 'Casual Shoes', 'Slippers & Clogs',
+  'Express Shipping', 'Easy Returns', 'Premium Quality',
+];
 const DEFAULT_FEATURE = [
-  { icon: '🚚', title: 'Free Delivery', subtitle: 'Orders above ₹999' },
-  { icon: '🔄', title: '30-Day Returns', subtitle: 'Easy exchange' },
-  { icon: '✅', title: '100% Authentic', subtitle: 'Every product' },
-  { icon: '⚡', title: 'Fast Dispatch', subtitle: 'Order by 2 PM' },
+  { icon: '🚚', title: 'Free Delivery',   subtitle: 'Orders above ₹999' },
+  { icon: '🔄', title: '30-Day Returns',  subtitle: 'Easy exchange' },
+  { icon: '✅', title: '100% Authentic',  subtitle: 'Every product' },
+  { icon: '⚡', title: 'Fast Dispatch',   subtitle: 'Order by 2 PM' },
 ];
 
 /* ═══════════════════════════════════════════════════════════════════ */
 export default function HomePage() {
+
   /* ── Queries ── */
   const { data: siteSettings } = useQuery({
     queryKey: ['publicSettings'],
-    queryFn: () => fetch(`${import.meta.env.VITE_API_URL || '/api'}/settings/public`).then(r => r.json()).then(d => d.settings || {}),
+    queryFn: () =>
+      fetch(`${import.meta.env.VITE_API_URL || '/api'}/settings/public`)
+        .then((r) => r.json())
+        .then((d) => d.settings || {}),
     staleTime: 5 * 60 * 1000,
   });
+
   const { data: banners } = useQuery({
     queryKey: ['banners'],
     queryFn: () => api.get('/banners'),
-    select: d => Array.isArray(d) ? d : (d?.banners || []),
+    select: (d) => (Array.isArray(d) ? d : d?.banners || []),
   });
+
   const { data: collections } = useQuery({
     queryKey: ['publicCollections'],
     queryFn: () => api.get('/collections'),
-    select: d => d.collections || [],
+    select: (d) => d.collections || [],
   });
+
   const { data: allProds, isLoading: loadAll } = useQuery({
     queryKey: ['homeProducts'],
     queryFn: () => api.get('/products?limit=20&sort=newest'),
   });
+
   const { data: bsProds, isLoading: loadBS } = useQuery({
     queryKey: ['bestSellers'],
     queryFn: () => api.get('/products?bestSeller=true&limit=10'),
     enabled: siteSettings?.homepageShowBestSellers !== false,
   });
+
   const { data: naProds, isLoading: loadNA } = useQuery({
     queryKey: ['newArrivals'],
     queryFn: () => api.get('/products?newArrival=true&limit=10'),
@@ -336,208 +696,163 @@ export default function HomePage() {
   const featureBar   = siteSettings?.featureBar?.length   ? siteSettings.featureBar   : DEFAULT_FEATURE;
 
   /* ── Banners ── */
-  const banner2 = banners?.find(b => b.position === 2) || PH[1];
-  const banner3 = banners?.find(b => b.position === 3) || PH[2];
-  const banner4 = banners?.find(b => b.position === 4) || PH[3];
+  const banner2 = banners?.find((b) => b.position === 2) || PH[1];
+  const banner3 = banners?.find((b) => b.position === 3) || PH[2];
+  const banner4 = banners?.find((b) => b.position === 4) || PH[3];
 
   const allProducts = allProds?.products || [];
   const bsProducts  = bsProds?.products  || [];
   const naProducts  = naProds?.products  || [];
 
-  /* ── Category tiles: collections from API + static fallbacks ── */
-  const catTiles = [
-    { label: 'All', slug: null, href: '/products', emoji: '🛍️', color: 'bg-gray-900', image: null },
-    ...(collections?.length
-      ? collections.map(c => ({
-          label: c.name,
-          slug: c.slug,
-          href: `/collections/${c.slug}`,
-          emoji: CAT_EMOJI[c.slug] || CAT_EMOJI.default,
-          color: CAT_COLORS[c.slug] || CAT_COLORS.default,
-          image: c.image || null,
-        }))
-      : [
-          { label: 'Sneakers',         href: '/collections/sneakers',       emoji: '👟', color: 'bg-blue-600',   image: null },
-          { label: 'Casual Shoes',     href: '/collections/casual-shoes',   emoji: '🥿', color: 'bg-amber-500',  image: null },
-          { label: 'Slippers & Clogs', href: '/collections/slippers-clogs', emoji: '🩴', color: 'bg-emerald-600',image: null },
-        ]
-    ),
-    { label: 'New Arrivals', href: '/products?newArrival=true', emoji: '⭐', color: 'bg-violet-600', image: null },
-    { label: 'Sale',         href: '/products',                  emoji: '🔥', color: 'bg-red-600',    image: null },
-  ];
+  /* ── Collection tiles ── */
+  const colTiles = collections?.length
+    ? collections.map((c) => ({
+        label: c.name,
+        href:  `/collections/${c.slug}`,
+        image: c.image || null,
+        bg:    '#111',
+      }))
+    : [
+        { label: 'Sneakers',         href: '/collections/sneakers',       image: null, bg: '#0D1117' },
+        { label: 'Casual Shoes',     href: '/collections/casual-shoes',   image: null, bg: '#0D0D0D' },
+        { label: 'Slippers & Clogs', href: '/collections/slippers-clogs', image: null, bg: '#0A0D0A' },
+      ];
 
-  /* ── Reviews loop ── */
   const doubledReviews = [...ALL_REVIEWS, ...ALL_REVIEWS];
 
   return (
-    <div className="bg-white">
+    <div style={{ background: '#0A0A0A', color: '#fff' }}>
 
-      {/* ══ HERO ══════════════════════════════════════════════════════ */}
+      {/* ══ A. HERO ══════════════════════════════════════════════════ */}
       <HeroBanner banners={banners} />
 
-      {/* ══ USP STRIP ════════════════════════════════════════════════ */}
+      {/* ══ B. USP STRIP ════════════════════════════════════════════ */}
       <UspStrip featureBar={featureBar} />
 
-      {/* ══ CATEGORY STRIP ═══════════════════════════════════════════ */}
-      <div className="bg-white border-b border-gray-100 py-5">
-        <div className="max-w-7xl mx-auto px-4">
-          <div className="flex gap-4 sm:gap-6 overflow-x-auto scrollbar-hide justify-start sm:justify-center pb-1">
-            {catTiles.map((cat, i) => (
-              <Link key={i} to={cat.href}
-                className="flex-shrink-0 flex flex-col items-center gap-2 group">
-                <div className={`relative w-[60px] h-[60px] sm:w-[70px] sm:h-[70px] rounded-full overflow-hidden border-2 border-transparent group-hover:border-gray-900 group-hover:shadow-lg transition-all duration-200 ${!cat.image ? cat.color : ''}`}>
-                  {cat.image
-                    ? <img src={getImageUrl(cat.image)} alt={cat.label} className="w-full h-full object-cover group-hover:scale-110 transition-transform duration-300" />
-                    : <span className="w-full h-full flex items-center justify-center text-2xl sm:text-3xl">{cat.emoji}</span>
-                  }
-                </div>
-                <span className="text-[10px] sm:text-[11px] font-semibold text-gray-700 text-center leading-tight max-w-[70px] group-hover:text-gray-900 transition-colors">
-                  {cat.label}
-                </span>
-              </Link>
+      {/* ══ C. DUAL MARQUEE ═════════════════════════════════════════ */}
+      <DualMarquee items={marqueeItems} />
+
+      {/* ══ D. CATEGORY STRIP ═══════════════════════════════════════ */}
+      {siteSettings?.homepageShowCollections !== false && (
+        <Reveal className="py-12 sm:py-16 px-4 sm:px-6 max-w-7xl mx-auto">
+          <SectionTitle title="SHOP BY COLLECTION" sub="Explore" />
+          <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-4">
+            {colTiles.map((cat, i) => (
+              <CategoryCard key={i} cat={cat} />
             ))}
           </div>
+        </Reveal>
+      )}
+
+      {/* ══ E. NEW DROPS ═════════════════════════════════════════════ */}
+      {siteSettings?.homepageShowNewArrivals !== false && (
+        <Reveal className="py-10 px-4 sm:px-6 max-w-7xl mx-auto">
+          <SectionTitle
+            title="NEW DROPS"
+            sub="Just Dropped"
+            href="/products?newArrival=true"
+          />
+          <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5 gap-3">
+            {loadNA
+              ? Array.from({ length: 5 }).map((_, i) => <Skel key={i} />)
+              : (naProducts.length ? naProducts : allProducts).slice(0, 10).map((p, i) => (
+                  <ProductCard key={p._id} product={p} index={i} />
+                ))}
+          </div>
+        </Reveal>
+      )}
+
+      {/* ══ F. BEST SELLERS ══════════════════════════════════════════ */}
+      {siteSettings?.homepageShowBestSellers !== false && (
+        <Reveal className="py-10 px-4 sm:px-6 max-w-7xl mx-auto">
+          <SectionTitle
+            title="BEST SELLERS"
+            sub="Top Picks"
+            href="/products?bestSeller=true"
+          />
+          <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5 gap-3">
+            {loadBS
+              ? Array.from({ length: 5 }).map((_, i) => <Skel key={i} />)
+              : (bsProducts.length ? bsProducts : allProducts).slice(0, 10).map((p, i) => (
+                  <ProductCard key={p._id} product={p} index={i} />
+                ))}
+          </div>
+          <div className="mt-8 flex justify-center">
+            <Link
+              to="/products"
+              className="inline-flex items-center gap-2 px-10 py-3 rounded-full text-sm font-black uppercase tracking-wider transition-all duration-200"
+              style={{ border: '2px solid #C8FF00', color: '#C8FF00' }}
+              onMouseEnter={e => {
+                e.currentTarget.style.background = '#C8FF00';
+                e.currentTarget.style.color = '#0A0A0A';
+                e.currentTarget.style.boxShadow = '0 0 24px rgba(200,255,0,0.4)';
+              }}
+              onMouseLeave={e => {
+                e.currentTarget.style.background = 'transparent';
+                e.currentTarget.style.color = '#C8FF00';
+                e.currentTarget.style.boxShadow = 'none';
+              }}
+            >
+              View All Products <FiArrowRight />
+            </Link>
+          </div>
+        </Reveal>
+      )}
+
+      {/* ══ G. PROMO BANNERS ═════════════════════════════════════════ */}
+      <Reveal className="py-8 px-4 sm:px-6 max-w-7xl mx-auto">
+        <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+          <PromoBanner banner={banner3} />
+          <PromoBanner banner={banner4} />
         </div>
-      </div>
+      </Reveal>
 
-      <div className="max-w-7xl mx-auto px-3 sm:px-4 space-y-0">
+      {/* ══ Second marquee between sections ════════════════════════ */}
+      <DualMarquee items={marqueeItems} />
 
-        {/* ══ BEST SELLERS ════════════════════════════════════════════ */}
-        {siteSettings?.homepageShowBestSellers !== false && (
-          <Reveal className="pt-6">
-            <div className="bg-white">
-              <SectionTitle title="Best Sellers" sub="Top Picks" href="/products?bestSeller=true" />
-              <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5 gap-2.5 sm:gap-3">
-                {loadBS
-                  ? Array.from({ length: 5 }).map((_, i) => <Skel key={i} />)
-                  : (bsProducts.length ? bsProducts : allProducts).slice(0, 10).map((p, i) => (
-                      <ProductCard key={p._id} product={p} index={i} />
-                    ))}
-              </div>
-              <div className="mt-5 flex justify-center">
-                <Link to="/products"
-                  className="inline-flex items-center gap-2 border-2 border-gray-900 text-gray-900 font-bold text-sm px-10 py-3 rounded-full hover:bg-gray-900 hover:text-white transition-all duration-200">
-                  View All Products <FiArrowRight className="text-xs" />
-                </Link>
-              </div>
-            </div>
-          </Reveal>
-        )}
-
-        {/* ══ PROMO BANNER — SNEAKERS ══════════════════════════════════ */}
-        <Reveal className="pt-6">
-          <PromoBanner banner={banner2} className="w-full" />
-        </Reveal>
-
-      </div>
-
-      {/* ══ DUAL MARQUEE ════════════════════════════════════════════ */}
-      <div className="mt-6">
-        <DualMarquee items={marqueeItems} />
-      </div>
-
-      <div className="max-w-7xl mx-auto px-3 sm:px-4 space-y-0">
-
-        {/* ══ NEW ARRIVALS ══════════════════════════════════════════════ */}
-        {siteSettings?.homepageShowNewArrivals !== false && (
-          <Reveal className="pt-6">
-            <div className="bg-white">
-              <SectionTitle title="New Arrivals" sub="Just Dropped" href="/products?newArrival=true" />
-              <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5 gap-2.5 sm:gap-3">
-                {loadNA
-                  ? Array.from({ length: 5 }).map((_, i) => <Skel key={i} />)
-                  : (naProducts.length ? naProducts : allProducts).slice(0, 10).map((p, i) => (
-                      <ProductCard key={p._id} product={p} index={i} />
-                    ))}
-              </div>
-            </div>
-          </Reveal>
-        )}
-
-        {/* ══ 2-COL PROMO BANNERS ═══════════════════════════════════════ */}
-        <Reveal className="pt-6">
-          <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
-            <PromoBanner banner={banner3} />
-            <PromoBanner banner={banner4} />
-          </div>
-        </Reveal>
-
-        {/* ══ SHOP BY COLLECTION ═══════════════════════════════════════ */}
-        {siteSettings?.homepageShowCollections !== false && (
-          <Reveal className="pt-6">
-            <div className="text-center mb-5 sm:mb-6">
-              <p className="text-[10px] text-gray-400 uppercase tracking-[0.25em] font-bold mb-1">Explore</p>
-              <h2 className="text-xl sm:text-2xl font-bold text-gray-900">Shop by Collection</h2>
-            </div>
-            <div className="grid grid-cols-1 sm:grid-cols-3 gap-3 sm:gap-4">
-              {[
-                { label: 'Sneakers',         sub: 'Street style & sports',      href: '/collections/sneakers',       bg: '#0f172a' },
-                { label: 'Casual Shoes',     sub: 'All-day comfort & style',     href: '/collections/casual-shoes',   bg: '#3b0764' },
-                { label: 'Slippers & Clogs', sub: 'Relaxed everyday comfort',    href: '/collections/slippers-clogs', bg: '#052e16' },
-              ].map((col, i) => {
-                const found = collections?.find(c => c.href === col.href || col.href.includes(c.slug));
-                const img = found?.bannerImage || found?.image || null;
-                return (
-                  <Link key={i} to={col.href}
-                    className="relative overflow-hidden rounded-2xl flex flex-col justify-end group"
-                    style={{ backgroundColor: col.bg, minHeight: 180, minHeight: 'clamp(160px, 25vw, 260px)' }}>
-                    {img && <img src={getImageUrl(img)} alt={col.label} className="absolute inset-0 w-full h-full object-cover group-hover:scale-105 transition-transform duration-600" />}
-                    <div className="absolute inset-0 bg-gradient-to-t from-black/85 via-black/25 to-transparent" />
-                    <div className="relative z-10 p-4 sm:p-6">
-                      <p className="text-white/50 text-[10px] font-bold uppercase tracking-[0.2em] mb-1">{col.sub}</p>
-                      <h3 className="font-display text-2xl sm:text-3xl font-black text-white tracking-tight leading-none">{col.label}</h3>
-                      <span className="inline-flex items-center gap-1.5 mt-3 text-[11px] font-bold text-white border border-white/25 px-3 py-1.5 rounded-full group-hover:bg-white group-hover:text-gray-900 transition-all">
-                        Shop Now <FiArrowRight className="text-[9px]" />
-                      </span>
-                    </div>
-                  </Link>
-                );
-              })}
-            </div>
-          </Reveal>
-        )}
-
-        {/* ══ ALL PRODUCTS ══════════════════════════════════════════════ */}
-        <Reveal className="pt-6">
-          <SectionTitle title="Shop All Men's Footwear" sub="Complete Range" href="/products" />
-          <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5 gap-2.5 sm:gap-3">
-            {loadAll
-              ? Array.from({ length: 10 }).map((_, i) => <Skel key={i} />)
-              : allProducts.slice(0, 15).map((p, i) => <ProductCard key={p._id} product={p} index={i} />)}
-          </div>
-          {allProducts.length >= 15 && (
-            <div className="mt-5 flex justify-center">
-              <Link to="/products"
-                className="inline-flex items-center gap-2 bg-gray-900 text-white font-bold text-sm px-10 py-3 rounded-full hover:bg-gray-700 transition-all">
-                See All Products <FiArrowRight className="text-xs" />
-              </Link>
-            </div>
-          )}
-        </Reveal>
-
-      </div>
-
-      {/* ══ REVIEWS AUTO-SCROLL ═══════════════════════════════════════ */}
+      {/* ══ H. REVIEWS AUTO-SCROLL ═══════════════════════════════════ */}
       {siteSettings?.homepageShowReviews !== false && (
-        <div className="mt-8 sm:mt-10 bg-gray-50 py-8 sm:py-10">
-          <div className="max-w-7xl mx-auto px-4 mb-5 sm:mb-6">
-            <div className="flex flex-col sm:flex-row sm:items-end sm:justify-between gap-2">
+        <div className="py-12 sm:py-16" style={{ background: '#0A0A0A' }}>
+          <div className="max-w-7xl mx-auto px-4 mb-6">
+            <div className="flex flex-col sm:flex-row sm:items-end sm:justify-between gap-3">
               <div>
-                <p className="text-[10px] text-gray-400 uppercase tracking-[0.25em] font-bold mb-1">What People Say</p>
-                <h2 className="text-xl sm:text-2xl font-bold text-gray-900">Customer Reviews</h2>
+                <p
+                  className="text-[10px] uppercase tracking-[0.3em] font-bold mb-1"
+                  style={{ color: '#C8FF00' }}
+                >
+                  What People Say
+                </p>
+                <h2
+                  className="text-4xl sm:text-6xl font-black text-white"
+                  style={{ fontFamily: "'Bebas Neue', sans-serif" }}
+                >
+                  CUSTOMER REVIEWS
+                </h2>
               </div>
               <div className="flex items-center gap-1.5">
-                {[1,2,3,4,5].map(i => <FiStar key={i} className="text-amber-400 fill-amber-400 text-sm" />)}
-                <span className="font-bold text-sm text-gray-900 ml-1">4.9</span>
-                <span className="text-gray-400 text-xs">(500+ reviews)</span>
+                {[1, 2, 3, 4, 5].map((i) => (
+                  <FiStar
+                    key={i}
+                    className="text-sm"
+                    style={{ color: '#C8FF00', fill: '#C8FF00' }}
+                  />
+                ))}
+                <span className="font-bold text-sm text-white ml-1">4.9</span>
+                <span className="text-xs" style={{ color: '#555' }}>(500+ reviews)</span>
               </div>
             </div>
           </div>
-          {/* Auto-scroll container */}
+
           <div className="reviews-scroll-wrap overflow-hidden relative">
             {/* Fade edges */}
-            <div className="absolute left-0 top-0 bottom-0 w-8 sm:w-16 bg-gradient-to-r from-gray-50 to-transparent z-10 pointer-events-none" />
-            <div className="absolute right-0 top-0 bottom-0 w-8 sm:w-16 bg-gradient-to-l from-gray-50 to-transparent z-10 pointer-events-none" />
+            <div
+              className="absolute left-0 top-0 bottom-0 w-10 sm:w-20 z-10 pointer-events-none"
+              style={{ background: 'linear-gradient(to right, #0A0A0A, transparent)' }}
+            />
+            <div
+              className="absolute right-0 top-0 bottom-0 w-10 sm:w-20 z-10 pointer-events-none"
+              style={{ background: 'linear-gradient(to left, #0A0A0A, transparent)' }}
+            />
             <div className="reviews-track px-2">
               {doubledReviews.map((review, i) => (
                 <ReviewCard key={i} review={review} />
@@ -547,79 +862,103 @@ export default function HomePage() {
         </div>
       )}
 
-      <div className="max-w-7xl mx-auto px-3 sm:px-4 space-y-0">
+      {/* ══ I. STATS ══════════════════════════════════════════════════ */}
+      <Reveal className="py-12 sm:py-16 px-4 sm:px-6 max-w-7xl mx-auto">
+        <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
+          {[
+            { from: 0, to: 10000, suffix: '+', label: 'Customers',        sub: 'Happy shoppers' },
+            { from: 0, to: 50,    suffix: '+', label: 'Styles',           sub: 'Unique designs' },
+            { from: 4, to: 4.8,   suffix: '★', label: 'Rating',           sub: 'Avg store rating' },
+            { from: 0, to: 100,   suffix: '%', label: 'Same Day Dispatch', sub: 'Order by 2 PM' },
+          ].map(({ from, to, suffix, label, sub }, i) => (
+            <motion.div
+              key={label}
+              initial={{ opacity: 0, y: 20 }}
+              whileInView={{ opacity: 1, y: 0 }}
+              viewport={{ once: true }}
+              transition={{ delay: i * 0.1 }}
+              className="rounded-2xl p-5 sm:p-6 text-center"
+              style={{ background: '#111', border: '1px solid #222' }}
+            >
+              <p
+                className="text-4xl sm:text-5xl font-black leading-none mb-1"
+                style={{ fontFamily: "'Bebas Neue', sans-serif", color: '#C8FF00' }}
+              >
+                <Counter from={from} to={to} suffix={suffix} />
+              </p>
+              <p className="text-sm font-bold text-white">{label}</p>
+              <p className="text-[10px] mt-0.5" style={{ color: '#555' }}>{sub}</p>
+            </motion.div>
+          ))}
+        </div>
+      </Reveal>
 
-        {/* ══ WHY VELOQ ════════════════════════════════════════════════ */}
-        {siteSettings?.homepageShowWhyUs !== false && (
-          <Reveal className="pt-6">
-            <div className="bg-gray-900 rounded-2xl overflow-hidden">
-              <div className="px-5 sm:px-10 py-8 sm:py-10">
-                <div className="text-center mb-6 sm:mb-8">
-                  <p className="text-[10px] text-white/40 uppercase tracking-[0.3em] font-bold mb-1">Why Choose Us</p>
-                  <h2 className="text-xl sm:text-2xl font-bold text-white">The VELOQ Promise</h2>
-                </div>
-                <div className="grid grid-cols-2 md:grid-cols-4 gap-4 sm:gap-6">
-                  {[
-                    { icon: <FiTruck />,     title: 'Free Delivery',     desc: 'On orders above ₹999' },
-                    { icon: <FiRefreshCw />, title: '30-Day Returns',    desc: 'Hassle-free exchange' },
-                    { icon: <FiShield />,    title: '100% Authentic',    desc: 'Every single product' },
-                    { icon: <FiZap />,       title: 'Same Day Dispatch', desc: 'Order before 2 PM' },
-                  ].map((item, i) => (
-                    <motion.div key={i} initial={{ opacity: 0, y: 12 }} whileInView={{ opacity: 1, y: 0 }}
-                      viewport={{ once: true }} transition={{ delay: i * 0.08 }}
-                      className="flex flex-col items-center text-center p-4 rounded-xl hover:bg-white/5 transition-colors">
-                      <div className="w-11 h-11 bg-white/10 rounded-xl flex items-center justify-center text-white text-lg mb-3">
-                        {item.icon}
-                      </div>
-                      <p className="text-white font-bold text-sm">{item.title}</p>
-                      <p className="text-white/45 text-[11px] mt-1">{item.desc}</p>
-                    </motion.div>
-                  ))}
-                </div>
-              </div>
-            </div>
-          </Reveal>
-        )}
+      {/* ══ J. NEWSLETTER ════════════════════════════════════════════ */}
+      <Reveal className="py-4 pb-12 px-4 sm:px-6 max-w-7xl mx-auto">
+        <div
+          className="rounded-2xl py-12 sm:py-16 px-5 sm:px-12 text-center relative overflow-hidden"
+          style={{
+            background: 'linear-gradient(135deg, #111 0%, #0A0A0A 100%)',
+            border: '1px solid #222',
+          }}
+        >
+          {/* Lime glow accent */}
+          <div
+            className="absolute top-0 left-1/2 -translate-x-1/2 w-64 h-px"
+            style={{
+              background: 'linear-gradient(to right, transparent, #C8FF00, transparent)',
+              boxShadow: '0 0 20px rgba(200,255,0,0.4)',
+            }}
+          />
 
-        {/* ══ STATS ════════════════════════════════════════════════════ */}
-        <Reveal className="pt-5">
-          <div className="grid grid-cols-2 md:grid-cols-4 gap-3">
-            {[
-              { from: 0,   to: 500,  suffix: '+',  label: 'Happy Customers', icon: '😊' },
-              { from: 0,   to: 50,   suffix: '+',  label: 'Products',        icon: '👟' },
-              { from: 4.5, to: 4.9,  suffix: '★',  label: 'Avg Rating',      icon: '⭐' },
-              { from: 0,   to: 100,  suffix: '%',  label: 'Authentic',        icon: '✅' },
-            ].map(({ from, to, suffix, label, icon }) => (
-              <div key={label} className="bg-white border border-gray-100 rounded-2xl p-4 sm:p-5 text-center shadow-sm hover:shadow-md transition-shadow">
-                <div className="text-2xl mb-1">{icon}</div>
-                <p className="text-xl sm:text-2xl font-bold text-gray-900">
-                  <Counter from={from} to={to} suffix={suffix} />
-                </p>
-                <p className="text-[10px] sm:text-[11px] text-gray-500 font-medium mt-0.5">{label}</p>
-              </div>
-            ))}
-          </div>
-        </Reveal>
+          <p
+            className="text-[10px] uppercase tracking-[0.35em] font-bold mb-3"
+            style={{ color: '#C8FF00' }}
+          >
+            Exclusive Access
+          </p>
+          <h2
+            className="text-4xl sm:text-6xl font-black text-white mb-3 leading-none"
+            style={{ fontFamily: "'Bebas Neue', sans-serif" }}
+          >
+            GET FIRST ACCESS<br />TO NEW DROPS
+          </h2>
+          <p className="text-sm mb-8 max-w-sm mx-auto" style={{ color: '#777' }}>
+            Early drops, member-only deals, and exclusive styles. Zero spam.
+          </p>
 
-        {/* ══ NEWSLETTER ═══════════════════════════════════════════════ */}
-        <Reveal className="pt-5 pb-8">
-          <div className="bg-gray-900 rounded-2xl py-8 sm:py-12 px-5 sm:px-10 text-center">
-            <p className="text-[10px] text-white/40 uppercase tracking-[0.3em] font-bold mb-2">Exclusive Access</p>
-            <h2 className="text-xl sm:text-2xl font-bold text-white mb-2">Get First Access to New Drops</h2>
-            <p className="text-white/50 text-sm mb-6 max-w-sm mx-auto">Early drops, member-only deals, and exclusive styles. Zero spam.</p>
-            <form className="flex gap-2 max-w-sm mx-auto" onSubmit={e => e.preventDefault()}>
-              <input type="email" placeholder="your@email.com"
-                className="flex-1 bg-white/10 border border-white/20 text-white placeholder-white/35 rounded-full px-4 py-3 text-sm focus:outline-none focus:border-white/50 min-w-0" />
-              <button type="submit"
-                className="flex-shrink-0 bg-white text-gray-900 font-bold text-sm px-5 sm:px-6 py-3 rounded-full hover:bg-gray-100 transition-all">
-                Join
-              </button>
-            </form>
-            <p className="text-white/25 text-[10px] mt-3">Unsubscribe anytime · No spam ever</p>
-          </div>
-        </Reveal>
+          <form
+            className="flex gap-2 max-w-sm mx-auto"
+            onSubmit={(e) => e.preventDefault()}
+          >
+            <input
+              type="email"
+              placeholder="your@email.com"
+              className="flex-1 px-4 py-3 rounded-xl text-sm min-w-0"
+              style={{
+                background: '#0A0A0A',
+                border: '1px solid #333',
+                color: '#fff',
+              }}
+              onFocus={e => { e.target.style.borderColor = '#C8FF00'; }}
+              onBlur={e => { e.target.style.borderColor = '#333'; }}
+            />
+            <button
+              type="submit"
+              className="flex-shrink-0 px-6 py-3 rounded-xl text-sm font-black uppercase tracking-wider transition-all duration-200"
+              style={{ background: '#C8FF00', color: '#0A0A0A' }}
+              onMouseEnter={e => { e.currentTarget.style.boxShadow = '0 0 20px rgba(200,255,0,0.5)'; }}
+              onMouseLeave={e => { e.currentTarget.style.boxShadow = 'none'; }}
+            >
+              Join
+            </button>
+          </form>
+          <p className="text-[10px] mt-3" style={{ color: '#444' }}>
+            Unsubscribe anytime · No spam ever
+          </p>
+        </div>
+      </Reveal>
 
-      </div>
     </div>
   );
 }
